@@ -138,14 +138,15 @@ def fetch_history(ticker):
         if not page_bars:
             break
 
+        count_before = len(bars_by_date)
         for bar in page_bars:
             key = str(bar.get("date") or f"page-{page}-{len(bars_by_date)}")
             bars_by_date[key] = bar
 
-        received = len(page_bars)
-        remaining -= received
-        if received < page_size:
+        added = len(bars_by_date) - count_before
+        if added <= 0:
             break
+        remaining -= added
         page += 1
 
     bars = list(bars_by_date.values())
