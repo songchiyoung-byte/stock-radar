@@ -6,6 +6,9 @@
     },
     "api/search.py": {
       "maxDuration": 10
+    },
+    "api/analysis.py": {
+      "maxDuration": 10
     }
   },
   "rewrites": [
