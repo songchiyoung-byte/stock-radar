@@ -1,5 +1,4 @@
 import json
-import math
 import re
 import time
 import urllib.error
@@ -13,7 +12,8 @@ PRICE_HISTORY_URL = (
 )
 TICKER_PATTERN = re.compile(r"^[0-9]{6}$")
 MIN_BARS = 60
-PAGE_SIZE = 140
+HISTORY_BARS = 140
+MAX_PAGE_SIZE = 60
 
 COMMON_HEADERS = {
     "User-Agent": (
@@ -114,16 +114,43 @@ def normalize_history(payload):
 
 
 def fetch_history(ticker):
-    params = urllib.parse.urlencode({"pageSize": PAGE_SIZE, "page": 1})
-    url = f"{PRICE_HISTORY_URL.format(ticker=ticker)}?{params}"
     headers = {
         **COMMON_HEADERS,
         "Referer": f"https://m.stock.naver.com/domestic/stock/{ticker}/total",
     }
-    request = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(request, timeout=7) as response:
-        payload = json.loads(response.read().decode("utf-8"))
-    return normalize_history(payload)
+    bars_by_date = {}
+    remaining = HISTORY_BARS
+    page = 1
+
+    while remaining > 0:
+        page_size = min(remaining, MAX_PAGE_SIZE)
+        params = urllib.parse.urlencode({
+            "pageSize": page_size,
+            "page": page,
+        })
+        url = f"{PRICE_HISTORY_URL.format(ticker=ticker)}?{params}"
+        request = urllib.request.Request(url, headers=headers)
+
+        with urllib.request.urlopen(request, timeout=7) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+
+        page_bars = normalize_history(payload)
+        if not page_bars:
+            break
+
+        for bar in page_bars:
+            key = str(bar.get("date") or f"page-{page}-{len(bars_by_date)}")
+            bars_by_date[key] = bar
+
+        received = len(page_bars)
+        remaining -= received
+        if received < page_size:
+            break
+        page += 1
+
+    bars = list(bars_by_date.values())
+    bars.sort(key=lambda item: str(item.get("date") or ""))
+    return bars[-HISTORY_BARS:]
 
 
 def analyze_bars(ticker, bars):
