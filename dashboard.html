@@ -1485,6 +1485,11 @@
       document.getElementById(
         'formError'
       ).classList.add('hidden');
+
+      latestSearchResults = [];
+      selectedPriceRate = 0;
+      searchRequestSequence += 1;
+      clearTimeout(searchTimer);
     }
 
     function renderQuickPills() {
@@ -1806,30 +1811,47 @@
     }
 
     function validateForm(stock) {
-      const requiredNumbers = [
-        'currentPrice',
-        'buyZoneLow',
-        'buyZoneHigh',
-        'stopLoss',
-        'fairValue'
-      ];
-
-      const hasInvalidNumber =
-        requiredNumbers.some((key) => {
-          return (
-            !Number.isFinite(stock[key]) ||
-            stock[key] <= 0
-          );
-        });
-
-      if (hasInvalidNumber) {
-        return '가격 값은 모두 0보다 큰 숫자여야 합니다.';
+      if (
+        !Number.isFinite(stock.currentPrice) ||
+        stock.currentPrice <= 0
+      ) {
+        return '현재가는 0보다 큰 숫자여야 합니다.';
       }
 
+      const modelValues = [
+        stock.buyZoneLow,
+        stock.buyZoneHigh,
+        stock.stopLoss,
+        stock.fairValue
+      ];
+
+      const suppliedCount = modelValues.filter(
+        (value) =>
+          value !== null &&
+          value !== undefined &&
+          value !== '' &&
+          Number(value) > 0
+      ).length;
+
+      if (suppliedCount === 0) {
+        return null;
+      }
+
+      if (suppliedCount < modelValues.length) {
+        return '가격 모델을 입력하려면 손절선, Buy Zone 하단·상단, Base 적정가를 모두 입력하세요.';
+      }
+
+      const [
+        buyZoneLow,
+        buyZoneHigh,
+        stopLoss,
+        fairValue
+      ] = modelValues.map(Number);
+
       const validPriceOrder =
-        stock.stopLoss < stock.buyZoneLow &&
-        stock.buyZoneLow <= stock.buyZoneHigh &&
-        stock.buyZoneHigh < stock.fairValue;
+        stopLoss < buyZoneLow &&
+        buyZoneLow <= buyZoneHigh &&
+        buyZoneHigh < fairValue;
 
       if (!validPriceOrder) {
         return '필수 순서: 손절선 < Buy Zone 하단 ≤ 상단 < Base 적정가';
@@ -1845,7 +1867,7 @@
 
         const difference =
           Math.abs(
-            stock.fairValue -
+            fairValue -
             calculatedFairValue
           ) / calculatedFairValue;
 
@@ -1887,17 +1909,17 @@
           Number(
             getElement('inputCurrentPrice').value
           ),
-        dayChangeRate: 0,
+        dayChangeRate: selectedPriceRate,
         buyZoneLow:
-          Number(
+          numberOrNull(
             getElement('inputBuyLow').value
           ),
         buyZoneHigh:
-          Number(
+          numberOrNull(
             getElement('inputBuyHigh').value
           ),
         stopLoss:
-          Number(
+          numberOrNull(
             getElement('inputStopLoss').value
           ),
         isAiRecommended:
@@ -1911,7 +1933,8 @@
           model:
             getElement('inputModel')
               .value
-              .trim(),
+              .trim() ||
+            '분석 대기',
           baseMetricLabel: '기초 지표',
           baseMetricValue:
             numberOrNull(
@@ -1925,7 +1948,7 @@
               ).value
             ),
           fairValue:
-            Number(
+            numberOrNull(
               getElement('inputFairValue').value
             ),
           bearValue: null,
@@ -1938,7 +1961,8 @@
           techPoint:
             getElement('inputTechPoint')
               .value
-              .trim()
+              .trim() ||
+            '검증된 가격 모델 입력 대기'
         },
 
         thesis:
@@ -1948,7 +1972,8 @@
         source:
           getElement('inputSource')
             .value
-            .trim(),
+            .trim() ||
+          '현재가 API · 가격 모델 미입력',
         asOfDate:
           getElement('inputAsOfDate').value,
         lastCalculatedAt:
