@@ -2179,6 +2179,25 @@
         );
         const data = await response.json();
 
+        if (data.status === 'INSUFFICIENT_DATA') {
+          stock.analysis = {
+            ...data,
+            warnings: [data.message]
+          };
+          stock.analysisState = 'NOT_QUALIFIED';
+          stock.isAiRecommended = false;
+          saveStocks();
+          renderList();
+
+          if (!options.silent) {
+            showToast(
+              data.message ||
+              '분석에 필요한 일봉이 부족합니다.'
+            );
+          }
+          return;
+        }
+
         if (!response.ok || !data.success) {
           throw new Error(
             data.message ||
