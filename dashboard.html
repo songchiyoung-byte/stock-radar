@@ -1207,9 +1207,18 @@
       container.innerHTML = displayList.map((stock) => {
         const diagnosis = diagnoseStock(stock);
         const isUp = Number(stock.dayChangeRate) > 0;
-        const target = Number(stock.valuation?.fairValue);
+        const targetValue =
+          stock.valuation?.fairValue;
+
+        const target =
+          targetValue === null ||
+          targetValue === undefined ||
+          targetValue === ''
+            ? null
+            : Number(targetValue);
 
         const upside =
+          target !== null &&
           target > 0
             ? (
                 (
