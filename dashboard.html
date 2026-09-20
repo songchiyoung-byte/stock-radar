@@ -108,7 +108,7 @@
         </div>
       </div>
 
-      <!-- Live Status Ribbon -->
+      <!-- Live Realtime Engine Status Ribbon -->
       <div class="flex items-center justify-between mt-2 px-2.5 py-1.5 rounded-lg bg-gray-900/90 border border-gray-800 text-[11px]">
         <div class="flex items-center gap-1.5">
           <span class="relative flex h-2 w-2">
@@ -173,10 +173,6 @@
           <span class="text-[10px] text-gray-400 block mb-1">인기 종목 원클릭 선택:</span>
           <div class="flex flex-wrap gap-1" id="quickPills"></div>
         </div>
-        <div id="autoFillSuccessAlert" class="hidden mt-2 p-1.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-[11px] text-emerald-300 items-center gap-1">
-          <span>✨</span>
-          <span id="autoFillAlertText"></span>
-        </div>
       </div>
 
       <form id="addStockForm" onsubmit="handleAddStock(event)" class="space-y-3 text-xs">
@@ -187,14 +183,14 @@
           </div>
           <div>
             <label class="block text-gray-400 mb-1">티커코드 (6자리) *</label>
-            <input type="text" id="inputTicker" oninput="handleTickerDirectInput(this.value)" required placeholder="예: 360750" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none font-mono">
+            <input type="text" id="inputTicker" required placeholder="예: 360750" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none font-mono">
           </div>
         </div>
 
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="block text-gray-400 mb-1">현재가 (원) *</label>
-            <input type="number" id="inputCurrentPrice" onchange="autoCalculateIfCustom()" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-2 text-white focus:border-blue-500 focus:outline-none">
+            <input type="number" id="inputCurrentPrice" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-2 text-white focus:border-blue-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-emerald-400 mb-1">Buy Zone 하단 *</label>
@@ -230,12 +226,26 @@
         </div>
 
         <div>
-          <label class="block text-gray-400 mb-1">💡 AI 선정 이유 (1줄)</label>
+          <label class="block text-gray-400 mb-1">💡 선정 이유 (1줄)</label>
           <input type="text" id="inputAiReason" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
         </div>
         <div>
           <label class="block text-gray-400 mb-1">⚠️ 핵심 리스크 (1줄)</label>
           <input type="text" id="inputAiRisk" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-blue-500 focus:outline-none">
+        </div>
+
+        <div class="pt-2 border-t border-gray-700/70">
+          <p class="text-[11px] font-semibold text-gray-300 mb-1.5">산출 근거 (Provenance) 파라미터</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-gray-400 mb-0.5">적용 모델</label>
+              <input type="text" id="inputModel" placeholder="예: 120일선 눌림목 모델" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
+            </div>
+            <div>
+              <label class="block text-emerald-400 mb-0.5">상승 목표가 (원)</label>
+              <input type="number" id="inputTargetPrice" placeholder="예: 31000" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white">
+            </div>
+          </div>
         </div>
 
         <div class="flex items-center gap-2 pt-2">
@@ -251,13 +261,13 @@
       { id: 'ALL', label: '전체' },
       { id: 'BUY_ZONE', label: '🎯 매수 진입' },
       { id: 'APPROACHING', label: '⚡ 근접 (3% 이내)' },
-      { id: 'AI_DISCOVERY', label: '🤖 AI 발굴 (매수 적기)' },
+      { id: 'AI_DISCOVERY', label: '🤖 AI 발굴' },
       { id: 'CART', label: '내 장바구니' },
       { id: 'HOLDING', label: '보유 중' }
     ];
 
     let currentFilter = 'ALL';
-    const STORAGE_KEY = 'STOCK_BUY_ZONE_RADAR_DATA_V2026_FIXED';
+    const STORAGE_KEY = 'STOCK_BUY_ZONE_RADAR_DATA_V2026_RESTORED';
 
     const STOCK_KNOWLEDGE_BASE = [
       {
@@ -271,16 +281,16 @@
         stopLoss: 1590000,
         aiScore: 74,
         aliases: ['hynix', '하이닉스', '000660'],
-        aiReason: 'HBM3E/HBM4 독점적 공급 지위 및 빅테크 AI 가속기 탑재량 분기 대비 증가',
-        aiRisk: '빅테크 AI CapEx 조절 가능성 및 단기 급등 후 밸류에이션 부담',
+        aiReason: 'HBM3E/HBM4 독점적 공급 지위 및 빅테크 AI 가속기 탑재량 전분기 대비 35% 증가',
+        aiRisk: '빅테크 AI CapEx 속도 조절 가능성 및 단기 급등 후 밸류에이션 부담',
         provenance: {
-          model: '12M Forward PER 밴드 모델',
+          model: '12M Forward PER 밴드 중간값 눌림목 모델',
           baseDate: '2026-09-19',
           targetMultiple: 'PER 7.2x',
           targetPrice: 2100000,
           historicalPercentile: '중간 48%',
           riskRewardRatio: '1 : 2.9',
-          techAdjustment: '60일 이동평균선 지지 확인 구간'
+          techAdjustment: '전고점 돌파 후 60일선 지지 확인 구간'
         }
       },
       {
@@ -288,21 +298,22 @@
         ticker: '360750',
         market: 'ETF',
         currentPrice: 26280,
+        dayChangeRate: 0.15,
         buyZoneLow: 24800,
         buyZoneHigh: 25900,
         stopLoss: 23500,
         aiScore: 94,
-        aliases: ['tiger', 's&p500', '360750'],
-        aiReason: '미국 500대 기업 분산 투자 및 장기 우상향 인덱스',
-        aiRisk: '원/달러 환율 변동성',
+        aliases: ['tiger', 's&p500', 's&p', '타이거', '360750'],
+        aiReason: '미국 500대 기업 분산 투자 및 장기 우상향 인덱스, 연금/ISA 핵심 코어 자산',
+        aiRisk: '원/달러 환율 급락에 따른 환차손 리스크',
         provenance: {
-          model: 'S&P 500 지수 PER 밴드',
+          model: 'S&P 500 지수 역사적 Fwd P/E 19.5x 밴드 하단',
           baseDate: '2026-09-19',
-          targetMultiple: 'P/E 21.5x',
+          targetMultiple: 'P/E 21.5x (정상 복귀 시)',
           targetPrice: 31000,
-          historicalPercentile: '지수 중간선 52%',
+          historicalPercentile: '지수 중간선 52% (기술적 조정 밴드)',
           riskRewardRatio: '1 : 3.8',
-          techAdjustment: '120일선 눌림목'
+          techAdjustment: '120일 이동평균선 이격도 98% 눌림목 지지선'
         }
       },
       {
@@ -310,21 +321,22 @@
         ticker: '005930',
         market: 'KOSPI',
         currentPrice: 78500,
+        dayChangeRate: -0.25,
         buyZoneLow: 74000,
         buyZoneHigh: 77000,
         stopLoss: 71000,
         aiScore: 88,
-        aliases: ['삼전', '삼성', '005930'],
-        aiReason: 'HBM3E 공급 퀄테스트 통과 기대감 및 파운드리 수율 개선',
-        aiRisk: '레거시 D램 가격 변동',
+        aliases: ['삼성전자', '삼전', '005930'],
+        aiReason: 'HBM3E 엔비디아 공급 퀄테스트 통과 기대 및 3nm 파운드리 수율 개선',
+        aiRisk: '레거시 D램 가격 반등 지연 및 중국 메모리 증설 하방 압력',
         provenance: {
-          model: 'P/B 밴드 하단 평가',
+          model: '12M Forward P/B 밴드 하단 평가 모델',
           baseDate: '2026-09-18',
-          targetMultiple: 'P/B 1.15x',
+          targetMultiple: 'P/B 1.15x (역사적 저평가선)',
           targetPrice: 92000,
-          historicalPercentile: '하위 5%',
+          historicalPercentile: '하위 5.2%',
           riskRewardRatio: '1 : 5.1',
-          techAdjustment: '장기 지지선'
+          techAdjustment: '240일 장기 추세선 지지 버퍼'
         }
       },
       {
@@ -332,21 +344,22 @@
         ticker: '034020',
         market: 'KOSPI',
         currentPrice: 85700,
+        dayChangeRate: 1.18,
         buyZoneLow: 83000,
         buyZoneHigh: 86500,
         stopLoss: 78000,
         aiScore: 89,
-        aliases: ['원전', '034020'],
-        aiReason: '원전 수주 및 SMR 파운드리 수혜',
-        aiRisk: '원전 착공 일정 변동',
+        aliases: ['두산에너', '원전', '034020'],
+        aiReason: '체코 원전 수주를 필두로 한 유럽/중동 대형 원전 및 SMR 파운드리 수혜',
+        aiRisk: '원전 착공 일정 지연 및 지배구조 개편 관련 시장 피로감',
         provenance: {
-          model: '수주잔고 모델',
+          model: '글로벌 원전 기자재 수주잔고 P/B 모델',
           baseDate: '2026-09-19',
           targetMultiple: 'P/B 1.35x',
           targetPrice: 98000,
-          historicalPercentile: '하위 18%',
+          historicalPercentile: '하위 18.0%',
           riskRewardRatio: '1 : 3.1',
-          techAdjustment: '박스권 중단'
+          techAdjustment: '박스권 중단 지지선 확인'
         }
       },
       {
@@ -354,21 +367,22 @@
         ticker: '035420',
         market: 'KOSPI',
         currentPrice: 197500,
+        dayChangeRate: 0.76,
         buyZoneLow: 190000,
         buyZoneHigh: 198000,
         stopLoss: 175000,
         aiScore: 89,
-        aliases: ['네이버', '035420'],
-        aiReason: 'AI 검색 도입 및 광고 단가 회복',
-        aiRisk: '이커머스 경쟁 심화',
+        aliases: ['네이버', 'naver', '035420'],
+        aiReason: '서치플랫폼 AI 검색 브리핑 도입에 따른 광고 단가 상승 및 커머스 배송 경쟁력 회복',
+        aiRisk: '중국 C-커머스 공세 지속 및 AI 인프라 투자 비용 부담',
         provenance: {
-          model: 'P/E 밴드 하단',
+          model: '역사적 P/E 밴드 10년 최저점 회귀 모델',
           baseDate: '2026-09-17',
           targetMultiple: 'PER 15.2x',
           targetPrice: 225000,
-          historicalPercentile: '하위 3%',
+          historicalPercentile: '하위 3.1%',
           riskRewardRatio: '1 : 5.9',
-          techAdjustment: '쌍바닥 지지'
+          techAdjustment: '주봉상 쌍바닥 지지선 반영'
         }
       }
     ];
@@ -426,7 +440,7 @@
           badgeText: '⛔ 진입 중단',
           badgeClass: 'bg-red-500/20 text-red-400 border-red-500/50',
           actionTitle: '매수 중단 (손절선 이탈)',
-          actionDesc: `하단 지지선을 이탈했습니다.`,
+          actionDesc: `하단 지지선(${planStop.toLocaleString()}원)을 이탈했습니다. 추가 매수를 멈추고 리스크를 점검하세요.`,
           step1: planStep1, step2: planStep2, stopPrice: planStop
         };
       }
@@ -435,8 +449,8 @@
           gap, isBuyZone: true, isApproaching: false,
           badgeText: '🔥 적극 비중확대 (2차)',
           badgeClass: 'bg-emerald-500/25 text-emerald-300 border-emerald-500/60 animate-subtle-pulse',
-          actionTitle: '2차 분할 매수 구간',
-          actionDesc: `최적의 2차 비중확대 구간입니다.`,
+          actionTitle: '2차 분할 매수 구간 (비중 40% 투입)',
+          actionDesc: '바닥 중심가에 도달했습니다. 평단가를 확실하게 낮출 수 있는 최적의 2차 비중확대 구간입니다.',
           step1: planStep1, step2: planStep2, stopPrice: planStop
         };
       }
@@ -445,8 +459,8 @@
           gap, isBuyZone: true, isApproaching: false,
           badgeText: '🟢 1차 분할매수 진입',
           badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 animate-subtle-pulse',
-          actionTitle: '1차 분할 매수 진입',
-          actionDesc: `Buy Zone 상단에 들어왔습니다. 목표 비중의 30%를 진입하세요.`,
+          actionTitle: '1차 분할 매수 진입 (비중 30% 발담그기)',
+          actionDesc: 'Buy Zone 상단에 들어왔습니다. 혹시 모를 추가 하락에 대비해 30%만 가볍게 진입하세요.',
           step1: planStep1, step2: planStep2, stopPrice: planStop
         };
       }
@@ -455,8 +469,8 @@
           gap, isBuyZone: false, isApproaching: true,
           badgeText: `⚡ 진입 대기 (+${gap.toFixed(2)}%)`,
           badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/50',
-          actionTitle: '매수 대기',
-          actionDesc: `밴드 진입을 기다리세요.`,
+          actionTitle: '매수 대기 (1~2호가 근접)',
+          actionDesc: `상단가(${high.toLocaleString()}원)까지 ${gap.toFixed(1)}% 남았습니다. 밴드 진입을 기다리세요.`,
           step1: planStep1, step2: planStep2, stopPrice: planStop
         };
       }
@@ -465,7 +479,7 @@
         badgeText: `관망 (+${gap.toFixed(2)}%)`,
         badgeClass: 'bg-gray-800 border-gray-700 text-gray-400',
         actionTitle: '관망 및 가격 조정 대기',
-        actionDesc: `시스템 적정 매수가보다 ${gap.toFixed(1)}% 비쌉니다. 관찰 대기합니다.`,
+        actionDesc: `아직 시스템 적정 매수가보다 ${gap.toFixed(1)}% 비쌉니다. 매수를 보류하고 관찰 장바구니에 대기시킵니다.`,
         step1: planStep1, step2: planStep2, stopPrice: planStop
       };
     }
@@ -485,6 +499,15 @@
 
     function formatKRW(val) {
       return Number(val).toLocaleString('ko-KR') + '원';
+    }
+
+    function toggleProvenance(id) {
+      const target = stockData.find(s => s.id === id);
+      if (target) {
+        target.expanded = !target.expanded;
+        saveStocks();
+        renderStockCards();
+      }
     }
 
     function renderTabs() {
@@ -523,6 +546,48 @@
       renderStockCards();
     }
 
+    function generatePriceGaugeHTML(stock, action) {
+      const minScale = Math.min(stock.buyZoneLow * 0.94, stock.currentPrice * 0.97);
+      const maxScale = Math.max(stock.buyZoneHigh * 1.06, stock.currentPrice * 1.03);
+      const totalSpan = maxScale - minScale;
+
+      const buyLowPercent = Math.max(0, Math.min(100, ((stock.buyZoneLow - minScale) / totalSpan) * 100));
+      const buyHighPercent = Math.max(0, Math.min(100, ((stock.buyZoneHigh - minScale) / totalSpan) * 100));
+      const currentPercent = Math.max(2, Math.min(98, ((stock.currentPrice - minScale) / totalSpan) * 100));
+      const buyWidth = buyHighPercent - buyLowPercent;
+
+      let markerColor = action.isBuyZone ? 'bg-emerald-400 border-white' : (action.isApproaching ? 'bg-amber-400 border-amber-200' : 'bg-blue-400 border-blue-200');
+
+      return `
+        <div class="mt-2.5 pt-2 border-t border-gray-700/60">
+          <div class="flex items-center justify-between text-[11px] mb-1">
+            <span class="text-gray-400 flex items-center gap-1 font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              System Buy Zone
+            </span>
+            <span class="text-emerald-400 font-semibold">${formatKRW(stock.buyZoneLow)} ~ ${formatKRW(stock.buyZoneHigh)}</span>
+          </div>
+
+          <div class="relative w-full h-3 bg-gray-900 rounded-full overflow-hidden border border-gray-700/80 my-2">
+            <div class="absolute top-0 bottom-0 bg-gradient-to-r from-emerald-500/30 via-emerald-400/45 to-emerald-500/30 border-x border-emerald-500/70"
+                 style="left: ${buyLowPercent}%; width: ${buyWidth}%;"></div>
+            
+            <div class="absolute top-0 bottom-0 flex items-center justify-center -ml-1.5" style="left: ${currentPercent}%;">
+              <div class="relative w-3 h-3 rounded-full ${markerColor} border-2 shadow-lg"></div>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center text-[10px] text-gray-500">
+            <span>하단 ${Number(stock.buyZoneLow).toLocaleString()}</span>
+            <span class="${action.isBuyZone ? 'text-emerald-400 font-bold' : (action.isApproaching ? 'text-amber-400 font-bold' : 'text-gray-400')}">
+              현재가 위치 ${currentPercent.toFixed(0)}%
+            </span>
+            <span>상단 ${Number(stock.buyZoneHigh).toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+    }
+
     function renderStockCards() {
       const container = document.getElementById('stockListContainer');
       const emptyState = document.getElementById('emptyState');
@@ -542,15 +607,17 @@
         const isUp = (stock.dayChangeRate || 0) > 0;
         const changeColor = isUp ? 'text-rose-400' : 'text-blue-400';
         const changeSign = isUp ? '+' : '';
+        const targetPrice = stock.provenance?.targetPrice || Math.round(stock.buyZoneHigh * 1.25);
+        const upsideRate = (((targetPrice - stock.currentPrice) / stock.currentPrice) * 100).toFixed(1);
 
         return `
-          <div class="bg-finCard rounded-xl border border-finBorder p-4 shadow-xl relative">
+          <div class="bg-finCard rounded-xl border border-finBorder p-4 shadow-xl transition-all hover:border-gray-600 relative">
             <div class="flex items-start justify-between">
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="text-base font-bold text-white">${stock.name}</h3>
                   <span class="text-[11px] font-mono text-gray-400">${stock.ticker}</span>
-                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-gray-700 text-gray-300">${stock.market}</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded ${stock.market === 'ETF' ? 'bg-cyan-500/20 text-cyan-300' : 'bg-gray-700 text-gray-300'}">${stock.market}</span>
                 </div>
                 <div class="flex items-baseline gap-2 mt-1">
                   <span id="price-${stock.ticker}" class="text-xl font-extrabold text-white font-mono">${formatKRW(stock.currentPrice)}</span>
@@ -562,18 +629,172 @@
               </div>
             </div>
 
-            <div class="mt-2.5 pt-2 border-t border-gray-700/60 flex justify-between text-[11px]">
-              <span class="text-gray-400">System Buy Zone</span>
-              <span class="text-emerald-400 font-semibold">${formatKRW(stock.buyZoneLow)} ~ ${formatKRW(stock.buyZoneHigh)}</span>
+            ${generatePriceGaugeHTML(stock, action)}
+
+            <!-- AI 실행 지침 & 3단계 분할 매수 계획표 -->
+            <div class="mt-3 bg-gray-900/90 rounded-lg p-3 border border-gray-700/80 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-200 flex items-center gap-1.5">
+                  <span class="text-blue-400">⚡ AI 실행 지침:</span>
+                  <span class="${action.isBuyZone ? 'text-emerald-400' : (action.isApproaching ? 'text-amber-400' : 'text-gray-300')}">${action.actionTitle}</span>
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold">적합도 ${stock.aiScore || 80}점</span>
+              </div>
+              <p class="text-[11px] text-gray-400 leading-relaxed">${action.actionDesc}</p>
+
+              <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-gray-800 text-[10px] text-center">
+                <div class="bg-gray-800/80 rounded p-1.5 border border-gray-700/60">
+                  <span class="text-gray-400 block text-[9px]">1차 분할(30%)</span>
+                  <span class="font-bold text-emerald-400">${Number(action.step1).toLocaleString()}원</span>
+                </div>
+                <div class="bg-gray-800/80 rounded p-1.5 border border-gray-700/60">
+                  <span class="text-gray-400 block text-[9px]">2차 가중(40%)</span>
+                  <span class="font-bold text-cyan-400">${Number(action.step2).toLocaleString()}원</span>
+                </div>
+                <div class="bg-gray-800/80 rounded p-1.5 border border-gray-700/60">
+                  <span class="text-rose-400/90 block text-[9px]">손절선/중단</span>
+                  <span class="font-bold text-rose-400">${Number(action.stopPrice).toLocaleString()}원</span>
+                </div>
+              </div>
             </div>
 
-            <div class="mt-3 bg-gray-900/90 rounded-lg p-3 border border-gray-700/80 space-y-1.5 text-xs">
-              <div class="font-bold text-gray-200">${action.actionTitle}</div>
-              <div class="text-[11px] text-gray-400 leading-relaxed">${action.actionDesc}</div>
+            <!-- 1줄 선정 이유 및 핵심 리스크 -->
+            <div class="mt-2.5 bg-gray-900/60 rounded-lg p-2.5 border border-gray-800 text-[11px] space-y-1.5 leading-relaxed">
+              <div class="flex items-start gap-1.5 text-gray-300">
+                <span class="text-amber-400 font-bold shrink-0">💡 선정 이유:</span>
+                <span>${stock.aiReason}</span>
+              </div>
+              <div class="flex items-start gap-1.5 text-gray-400 border-t border-gray-800/80 pt-1.5">
+                <span class="text-rose-400 font-bold shrink-0">⚠️ 핵심 리스크:</span>
+                <span>${stock.aiRisk}</span>
+              </div>
+            </div>
+
+            <!-- 산출 근거 (Provenance) 아코디언 -->
+            <div class="mt-2">
+              <button onclick="toggleProvenance('${stock.id}')" class="w-full flex items-center justify-between py-1 px-1 text-[11px] text-gray-400 hover:text-gray-200 transition">
+                <span class="flex items-center gap-1 font-medium">
+                  <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                  </svg>
+                  산출 근거 (Provenance & Target) ${stock.expanded ? '접기' : '상세보기'}
+                </span>
+                <svg class="w-3.5 h-3.5 transform transition-transform duration-200 ${stock.expanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+
+              ${stock.expanded && stock.provenance ? `
+                <div class="mt-2 p-3 rounded-lg bg-gray-950/95 border border-blue-900/40 text-[11px] text-gray-300 space-y-2">
+                  <div class="flex justify-between items-center pb-1.5 border-b border-gray-800">
+                    <span class="text-gray-400">상승 목표가 (적정 가치)</span>
+                    <span class="font-bold text-emerald-400 text-xs">${Number(targetPrice).toLocaleString()}원 <span class="text-[10px] font-normal text-emerald-300">(+${upsideRate}%)</span></span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-400">적용 밸류에이션 모델</span>
+                    <span class="font-semibold text-blue-300">${stock.provenance.model}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-400">Target 평가 배수</span>
+                    <span class="font-mono text-gray-200">${stock.provenance.targetMultiple || '-'}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-400">역사적 밴드 위치</span>
+                    <span class="font-semibold text-amber-400">${stock.provenance.historicalPercentile || '하위 15% 이내 저평가'}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-400">손익비 (Risk/Reward)</span>
+                    <span class="font-semibold text-cyan-400">${stock.provenance.riskRewardRatio || '1 : 3.5'}</span>
+                  </div>
+                  <div class="flex justify-between items-start gap-2 pt-1 border-t border-gray-800/80">
+                    <span class="text-gray-400 shrink-0">기술적 보정치</span>
+                    <span class="text-right text-gray-300 font-medium">${stock.provenance.techAdjustment || '-'}</span>
+                  </div>
+                  <div class="text-[9px] text-gray-500 pt-0.5 text-right">기준일자: ${stock.provenance.baseDate}</div>
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    // Modal & Realtime Logic
+    function openAddModal() {
+      document.getElementById('addModal').classList.remove('hidden');
+      renderQuickPills();
+    }
+    function closeAddModal() {
+      document.getElementById('addModal').classList.add('hidden');
+      document.getElementById('addStockForm').reset();
+    }
+    function renderQuickPills() {
+      const pillsContainer = document.getElementById('quickPills');
+      const popularStocks = [
+        { label: 'SK하이닉스', ticker: '000660' },
+        { label: 'TIGER 미국S&P500', ticker: '360750' },
+        { label: '삼성전자', ticker: '005930' },
+        { label: '두산에너빌리티', ticker: '034020' },
+        { label: 'NAVER', ticker: '035420' }
+      ];
+      pillsContainer.innerHTML = popularStocks.map(item => `
+        <button type="button" onclick="selectStockByTicker('${item.ticker}')" class="px-2 py-0.5 rounded-md bg-gray-800 hover:bg-blue-600 hover:text-white border border-gray-700 text-gray-300 text-[10px] transition">
+          + ${item.label}
+        </button>
+      `).join('');
+    }
+    function selectStockByTicker(ticker) {
+      const found = STOCK_KNOWLEDGE_BASE.find(s => s.ticker === ticker);
+      if (found) {
+        document.getElementById('inputName').value = found.name;
+        document.getElementById('inputTicker').value = found.ticker;
+        document.getElementById('inputCurrentPrice').value = found.currentPrice;
+        document.getElementById('inputBuyLow').value = found.buyZoneLow;
+        document.getElementById('inputBuyHigh').value = found.buyZoneHigh;
+        document.getElementById('inputStopLoss').value = found.stopLoss;
+        document.getElementById('inputMarket').value = found.market;
+        document.getElementById('inputAiReason').value = found.aiReason;
+        document.getElementById('inputAiRisk').value = found.aiRisk;
+        if (found.provenance) {
+          document.getElementById('inputModel').value = found.provenance.model;
+          document.getElementById('inputTargetPrice').value = found.provenance.targetPrice;
+        }
+      }
+    }
+    function handleAddStock(e) {
+      e.preventDefault();
+      const ticker = document.getElementById('inputTicker').value.trim();
+      const buyZoneHigh = Number(document.getElementById('inputBuyHigh').value);
+      const newStock = {
+        id: 'stock-' + ticker + '-' + Date.now(),
+        name: document.getElementById('inputName').value.trim(),
+        ticker,
+        market: document.getElementById('inputMarket').value,
+        currentPrice: Number(document.getElementById('inputCurrentPrice').value),
+        dayChangeRate: 0.0,
+        buyZoneLow: Number(document.getElementById('inputBuyLow').value),
+        buyZoneHigh,
+        stopLoss: Number(document.getElementById('inputStopLoss').value),
+        status: document.getElementById('inputStatus').value,
+        aiScore: 85,
+        aiReason: document.getElementById('inputAiReason').value.trim(),
+        aiRisk: document.getElementById('inputAiRisk').value.trim(),
+        provenance: {
+          model: document.getElementById('inputModel').value.trim() || '12M Forward 밸류에이션 모델',
+          baseDate: '2026-09-20',
+          targetPrice: Number(document.getElementById('inputTargetPrice').value) || Math.round(buyZoneHigh * 1.25),
+          targetMultiple: 'PER 밴드 하단',
+          historicalPercentile: '하위 20%',
+          riskRewardRatio: '1 : 3.5',
+          techAdjustment: '이격도 지지'
+        },
+        expanded: false
+      };
+      stockData.unshift(newStock);
+      saveStocks();
+      closeAddModal();
+      renderTabs();
+      renderStockCards();
     }
 
     let isRealtimeRunning = true;
@@ -589,7 +810,6 @@
 
     async function fetchRealtimePrices() {
       if (!isRealtimeRunning || stockData.length === 0) return;
-
       const tickers = stockData.map(s => s.ticker).filter(Boolean);
 
       try {
