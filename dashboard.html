@@ -108,7 +108,7 @@
       </div>
 
       <div class="mb-4">
-        <input type="text" id="smartSearchInput" oninput="handleSmartSearch(this.value)" placeholder="예: 하이닉스, S&P500, 삼성전자, 000660..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none font-medium">
+        <input type="text" id="smartSearchInput" oninput="handleSmartSearch(this.value)" placeholder="예: 하이닉스, 삼성전자, S&P500, 005930..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none font-medium">
         <div id="searchResultsDropdown" class="hidden mt-1 max-h-48 overflow-y-auto rounded-lg bg-slate-950 border border-slate-700 divide-y divide-slate-800 text-xs"></div>
         <div class="mt-2 flex flex-wrap gap-1" id="quickPills"></div>
       </div>
@@ -153,7 +153,7 @@
 
         <div>
           <label class="block text-slate-400 mb-1">적용 밸류에이션 모델 (Provenance)</label>
-          <input type="text" id="inputModel" placeholder="예: 12M Fwd PER 밴드 하단 모델" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+          <input type="text" id="inputModel" placeholder="예: 12M Fwd P/B 밴드 하단 모델" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
         </div>
 
         <div class="flex items-center gap-2 pt-2">
@@ -165,10 +165,32 @@
   </div>
 
   <script>
-    let currentMainTab = 'AI_PICKS'; // 'AI_PICKS' or 'WATCHLIST'
-    const STORAGE_KEY = 'STOCK_RADAR_DATA_V2026_REFINED';
+    let currentMainTab = 'AI_PICKS';
+    // 스토리지 키 버전을 올려 구버전(7만 원대) 캐시를 즉각 자동 무효화
+    const STORAGE_KEY = 'STOCK_RADAR_DATA_V2026_PRICE_SYNCED_V4';
 
     const STOCK_DATABASE = [
+      {
+        name: '삼성전자',
+        ticker: '005930',
+        market: 'KOSPI',
+        currentPrice: 260000,
+        dayChangeRate: 2.97,
+        buyZoneLow: 245000,
+        buyZoneHigh: 255000,
+        stopLoss: 235000,
+        isAiRecommended: false,
+        provenance: {
+          model: '12M Forward P/B 밴드 평가 모델',
+          targetPrice: 310000,
+          targetMultiple: 'P/B 1.45x',
+          historicalBand: '역사적 밴드 중하단',
+          riskReward: '1 : 4.2',
+          techPoint: '직전 고점 돌파 후 지지선 확인',
+          thesis: '차세대 HBM 공급 가시화 및 파운드리 수율 개선',
+          risk: '글로벌 반도체 수급 사이클 변동성'
+        }
+      },
       {
         name: 'SK하이닉스',
         ticker: '000660',
@@ -252,27 +274,6 @@
           thesis: 'AI 검색 브리핑 도입에 따른 광고 단가 회복 및 커머스 쇄신',
           risk: '중국 C-커머스 경쟁 심화 및 AI 인프라 투자 비용'
         }
-      },
-      {
-        name: '삼성전자',
-        ticker: '005930',
-        market: 'KOSPI',
-        currentPrice: 78500,
-        dayChangeRate: -0.25,
-        buyZoneLow: 74000,
-        buyZoneHigh: 77000,
-        stopLoss: 71000,
-        isAiRecommended: false,
-        provenance: {
-          model: '12M Forward P/B 밴드 하단 평가',
-          targetPrice: 92000,
-          targetMultiple: 'P/B 1.15x',
-          historicalBand: '하위 5.2% 밸류 바닥',
-          riskReward: '1 : 5.1',
-          techPoint: '240일선 장기 추세선 지지 버퍼',
-          thesis: 'HBM3E 퀄테스트 통과 기대 및 3nm 파운드리 수율 개선',
-          risk: '레거시 D램 가격 반등 지연'
-        }
       }
     ];
 
@@ -283,10 +284,11 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) return JSON.parse(saved);
       } catch (e) {}
+      // 기본 장바구니에 삼성전자, SK하이닉스, TIGER 미국S&P500 배치
       return STOCK_DATABASE.map(s => ({
         ...s,
         id: 'stock-' + s.ticker,
-        inWatchlist: (s.ticker === '000660' || s.ticker === '360750'),
+        inWatchlist: (s.ticker === '005930' || s.ticker === '000660' || s.ticker === '360750'),
         expanded: false
       }));
     }
@@ -466,7 +468,7 @@
 
         return `
           <div class="bg-finCard rounded-xl border border-finBorder p-3.5 shadow-lg relative transition hover:border-slate-600">
-            <!-- Card Header: 종목명 클릭 시 네이버 증권 새 탭 이동 -->
+            <!-- 종목 헤더: 이름 클릭 시 네이버 증권 공식 페이지로 직결 -->
             <div class="flex items-start justify-between">
               <div>
                 <div class="flex items-center gap-1.5">
@@ -565,11 +567,11 @@
     function renderQuickPills() {
       const container = document.getElementById('quickPills');
       const presets = [
+        { label: '삼성전자', ticker: '005930' },
         { label: 'SK하이닉스', ticker: '000660' },
         { label: 'TIGER 미국S&P500', ticker: '360750' },
         { label: '두산에너빌리티', ticker: '034020' },
-        { label: 'NAVER', ticker: '035420' },
-        { label: '삼성전자', ticker: '005930' }
+        { label: 'NAVER', ticker: '035420' }
       ];
       container.innerHTML = presets.map(p => `
         <button type="button" onclick="selectPresetByTicker('${p.ticker}')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-blue-600 hover:text-white text-slate-300 text-[10px] border border-slate-700 transition">
@@ -659,7 +661,7 @@
 
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
         const res = await fetch(`/api/prices?tickers=${tickers.join(',')}`, { signal: controller.signal });
         clearTimeout(timeoutId);
 
@@ -674,11 +676,20 @@
                 if (s) {
                   s.currentPrice = info.price;
                   s.dayChangeRate = info.rate;
+
+                  const priceEl = document.getElementById(`price-${t}`);
+                  if (priceEl) priceEl.textContent = formatKRW(info.price);
+
+                  const changeEl = document.getElementById(`change-${t}`);
+                  if (changeEl) {
+                    const isUp = info.rate > 0;
+                    changeEl.className = `text-[11px] font-semibold ${isUp ? 'text-rose-400' : 'text-blue-400'}`;
+                    changeEl.textContent = `${isUp ? '+' : ''}${info.rate.toFixed(2)}%`;
+                  }
                 }
               }
             });
             saveStocks();
-            renderList();
           }
         }
       } catch (err) {}
