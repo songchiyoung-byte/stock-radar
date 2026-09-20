@@ -1503,52 +1503,46 @@
       }).join('');
     }
 
-    function handleSmartSearch(searchValue) {
+    function renderSearchResults(results, message = '') {
       const dropdown =
-        document.getElementById(
-          'searchResultsDropdown'
-        );
+        document.getElementById('searchResultsDropdown');
 
-      const query =
-        searchValue.trim().toLowerCase();
-
-      if (!query) {
-        dropdown.classList.add('hidden');
-        return;
-      }
-
-      const matches =
-        STOCK_DATABASE.filter((stock) => {
-          return (
-            stock.name.toLowerCase().includes(query) ||
-            stock.ticker.includes(query)
-          );
-        });
-
-      if (!matches.length) {
+      if (message) {
         dropdown.innerHTML = `
           <div class="p-2 text-slate-500 text-center text-[11px]">
-            프리셋 없음 — 아래에 직접 입력하세요.
+            ${escapeHTML(message)}
           </div>
         `;
-
         dropdown.classList.remove('hidden');
         return;
       }
 
-      dropdown.innerHTML = matches.map((stock) => {
+      latestSearchResults = results;
+
+      if (!results.length) {
+        renderSearchResults(
+          [],
+          '검색 결과가 없습니다. 6자리 티커를 직접 입력할 수도 있습니다.'
+        );
+        return;
+      }
+
+      dropdown.innerHTML = results.map((stock, index) => {
         return `
           <button
             type="button"
-            onclick="selectPresetByTicker('${stock.ticker}')"
-            class="w-full p-2 hover:bg-slate-800 flex justify-between">
+            onclick="selectSearchResult(${index})"
+            class="w-full p-2 hover:bg-slate-800 flex items-center justify-between gap-2 text-left">
 
-            <b>
-              ${escapeHTML(stock.name)}
-            </b>
+            <span>
+              <b>${escapeHTML(stock.name)}</b>
+              <span class="ml-1 text-[10px] text-slate-500">
+                ${escapeHTML(stock.market)}
+              </span>
+            </span>
 
             <span class="font-mono text-emerald-400">
-              ${formatKRW(stock.currentPrice)}
+              ${escapeHTML(stock.ticker)}
             </span>
           </button>
         `;
@@ -1557,16 +1551,94 @@
       dropdown.classList.remove('hidden');
     }
 
-    function selectPresetByTicker(ticker) {
-      const stock =
-        STOCK_DATABASE.find(
-          (item) => item.ticker === ticker
-        );
+    function handleSmartSearch(searchValue) {
+      const query = searchValue.trim();
+      clearTimeout(searchTimer);
 
-      if (!stock) {
+      if (!query) {
+        document.getElementById(
+          'searchResultsDropdown'
+        ).classList.add('hidden');
+        latestSearchResults = [];
         return;
       }
 
+      const localMatches =
+        STOCK_DATABASE.filter((stock) => {
+          const normalized = query.toLowerCase();
+
+          return (
+            stock.name.toLowerCase().includes(normalized) ||
+            stock.ticker.includes(normalized)
+          );
+        }).map((stock) => ({
+          name: stock.name,
+          ticker: stock.ticker,
+          market: stock.market,
+          preset: true
+        }));
+
+      if (localMatches.length) {
+        renderSearchResults(localMatches);
+      } else {
+        renderSearchResults([], '국내 종목 검색 중…');
+      }
+
+      const requestSequence =
+        ++searchRequestSequence;
+
+      searchTimer = setTimeout(async () => {
+        try {
+          const response = await fetch(
+            `/api/search?q=${encodeURIComponent(query)}`,
+            { cache: 'no-store' }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (
+            requestSequence !== searchRequestSequence ||
+            !data.success
+          ) {
+            return;
+          }
+
+          const combined = [
+            ...localMatches,
+            ...(data.results || [])
+          ];
+
+          const seen = new Set();
+          const deduplicated = combined.filter((stock) => {
+            if (!stock.ticker || seen.has(stock.ticker)) {
+              return false;
+            }
+
+            seen.add(stock.ticker);
+            return true;
+          });
+
+          renderSearchResults(deduplicated);
+        } catch (error) {
+          if (requestSequence !== searchRequestSequence) {
+            return;
+          }
+
+          if (!localMatches.length) {
+            renderSearchResults(
+              [],
+              '검색 서비스를 사용할 수 없습니다. 티커와 종목명을 직접 입력하세요.'
+            );
+          }
+        }
+      }, SEARCH_DEBOUNCE_MS);
+    }
+
+    function populateStockForm(stock) {
       const values = {
         inputName: stock.name,
         inputMarket: stock.market,
@@ -1575,15 +1647,15 @@
         inputBuyLow: stock.buyZoneLow,
         inputBuyHigh: stock.buyZoneHigh,
         inputStopLoss: stock.stopLoss,
-        inputFairValue: stock.valuation.fairValue,
+        inputFairValue: stock.valuation?.fairValue,
         inputBaseMetric:
-          stock.valuation.baseMetricValue,
+          stock.valuation?.baseMetricValue,
         inputTargetMultiple:
-          stock.valuation.targetMultipleValue,
+          stock.valuation?.targetMultipleValue,
         inputModel:
-          stock.valuation.model,
+          stock.valuation?.model,
         inputTechPoint:
-          stock.entryModel.techPoint,
+          stock.entryModel?.techPoint,
         inputSource:
           stock.source,
         inputAsOfDate:
@@ -1600,11 +1672,137 @@
 
       document.getElementById(
         'inputAiRecommended'
-      ).checked = stock.isAiRecommended;
+      ).checked = Boolean(stock.isAiRecommended);
+
+      selectedPriceRate =
+        Number(stock.dayChangeRate) || 0;
+    }
+
+    function clearPriceModelFields() {
+      [
+        'inputBuyLow',
+        'inputBuyHigh',
+        'inputStopLoss',
+        'inputFairValue',
+        'inputBaseMetric',
+        'inputTargetMultiple',
+        'inputModel',
+        'inputTechPoint',
+        'inputSource'
+      ].forEach((elementId) => {
+        document.getElementById(elementId).value = '';
+      });
+
+      document.getElementById(
+        'inputAiRecommended'
+      ).checked = false;
+    }
+
+    async function fetchPriceIntoForm(ticker) {
+      const priceInput =
+        document.getElementById('inputCurrentPrice');
+
+      priceInput.placeholder = '현재가 불러오는 중…';
+
+      try {
+        const response = await fetch(
+          `/api/prices?tickers=${encodeURIComponent(ticker)}`,
+          { cache: 'no-store' }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const priceInformation = data.prices?.[ticker];
+
+        if (
+          !priceInformation?.success ||
+          Number(priceInformation.price) <= 0
+        ) {
+          throw new Error('price unavailable');
+        }
+
+        priceInput.value =
+          Number(priceInformation.price);
+
+        selectedPriceRate =
+          Number(priceInformation.rate) || 0;
+
+        priceInput.placeholder = '현재가';
+      } catch (error) {
+        priceInput.placeholder =
+          '자동 조회 실패 — 직접 입력';
+        showToast(
+          '현재가 자동 조회에 실패했습니다. 직접 입력할 수 있습니다.',
+          'red'
+        );
+      }
+    }
+
+    function selectSearchResult(index) {
+      const result = latestSearchResults[index];
+
+      if (!result) {
+        return;
+      }
+
+      if (result.preset) {
+        selectPresetByTicker(result.ticker);
+        return;
+      }
+
+      const existing = userStocks.find(
+        (stock) => stock.ticker === result.ticker
+      );
+
+      if (existing) {
+        populateStockForm(existing);
+      } else {
+        clearPriceModelFields();
+
+        document.getElementById(
+          'inputName'
+        ).value = result.name;
+
+        document.getElementById(
+          'inputMarket'
+        ).value = result.market;
+
+        document.getElementById(
+          'inputTicker'
+        ).value = result.ticker;
+
+        document.getElementById(
+          'inputCurrentPrice'
+        ).value = '';
+      }
 
       document.getElementById(
         'searchResultsDropdown'
       ).classList.add('hidden');
+
+      fetchPriceIntoForm(result.ticker);
+    }
+
+    function selectPresetByTicker(ticker) {
+      const stock =
+        STOCK_DATABASE.find(
+          (item) => item.ticker === ticker
+        );
+
+      if (!stock) {
+        return;
+      }
+
+      populateStockForm(stock);
+
+      document.getElementById(
+        'searchResultsDropdown'
+      ).classList.add('hidden');
+
+      fetchPriceIntoForm(stock.ticker);
     }
 
     function validateForm(stock) {
