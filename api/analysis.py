@@ -179,9 +179,7 @@ def analyze_bars(ticker, bars):
     )
 
     prior20 = bars[-21:-1]
-    prior60 = bars[-61:-1]
     recent_low = min(bar["low"] for bar in prior20)
-    resistance = max(bar["high"] for bar in prior60)
     prior_high20 = max(bar["high"] for bar in prior20)
 
     support_candidates = [recent_low, ma20, ma60]
@@ -192,7 +190,7 @@ def analyze_bars(ticker, bars):
     buy_low = round_price(max(support - atr * 0.35, 1))
     buy_high = round_price(max(support + atr * 0.35, buy_low))
     stop_loss = round_price(max(support - atr * 1.5, 1))
-    target = round_price(resistance)
+    target = round_price(prior_high20)
     entry = (buy_low + buy_high) / 2
     risk = entry - stop_loss
     reward = target - entry
@@ -234,10 +232,12 @@ def analyze_bars(ticker, bars):
         technical_score += 5
     technical_score = min(technical_score, 100)
 
+    target_plausible = target <= current * 1.35
     structure_valid = (
         stop_loss < buy_low <= buy_high < target and
         risk_reward >= 2.0 and
-        technical_score >= 60
+        technical_score >= 60 and
+        target_plausible
     )
     in_zone = buy_low <= current <= buy_high
     gap_to_zone = ((current - buy_high) / buy_high) * 100
@@ -268,6 +268,8 @@ def analyze_bars(ticker, bars):
         warnings.append("기술 점수가 60점 미만입니다.")
     if target <= buy_high:
         warnings.append("확인된 저항이 Buy Zone보다 높지 않습니다.")
+    if not target_plausible:
+        warnings.append("최근 저항이 현재가보다 35% 이상 높아 목표가로 사용하지 않았습니다.")
 
     return {
         "success": True,
@@ -293,7 +295,7 @@ def analyze_bars(ticker, bars):
             "atr14": round_price(atr),
             "volumeRatio20": round(volume_ratio, 2) if volume_ratio else None,
             "recentLow20": round_price(recent_low),
-            "resistance60": target,
+            "resistance20": target,
         },
         "reasons": reasons,
         "warnings": warnings,
