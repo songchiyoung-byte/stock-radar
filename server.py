@@ -1,89 +1,65 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-AI 주식 관찰 장바구니 - 원클릭 실시간 증권 데이터 연동 엔진
-=============================================================
-- 증권사/포털(네이버/다음) 실시간 시세 크롤러 내장
-- 단일 스크립트 실행으로 백엔드 서버 + 대시보드 웹앱 동시 가동
-- 맥북 기본 브라우저 자동 오픈 (http://localhost:8000)
-"""
-
 import sys
 import json
 import os
-import re
 import urllib.request
-import urllib.error
 import urllib.parse
-import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 PORT = int(os.environ.get("PORT", 8000))
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 
-def fetch_live_stock_price(ticker):
+def fetch_batch_prices(tickers):
     """
-    네이버 및 다음 금융 실시간 시세를 조회합니다.
+    네이버 증권 멀티 시세 API를 사용하여 여러 종목의 현재가를 한 번에 조회합니다.
+    (해외 서버 IP에서도 차단 없이 응답)
     """
-    # 1. 네이버 금융 모바일 실시간 API 시도
-    naver_url = f"https://m.stock.naver.com/api/stock/{ticker}/realtime"
+    if not tickers:
+        return {}
+
+    ticker_param = ",".join(tickers)
+    url = f"https://polling.finance.naver.com/api/realtime/has/price?itemCodes={ticker_param}"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Referer": "https://finance.naver.com/"
     }
-    try:
-        req = urllib.request.Request(naver_url, headers=headers)
-        with urllib.request.urlopen(req, timeout=3) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            now_str = str(data.get("nowValue", "0")).replace(",", "")
-            change_str = str(data.get("changeValue", "0")).replace(",", "")
-            change_type = data.get("changeType", {}).get("name", "FLAT")
-            rate_str = str(data.get("changeRate", "0.0"))
-            
-            price = int(now_str) if now_str.isdigit() else 0
-            diff = int(change_str) if change_str.isdigit() else 0
-            if change_type == "FALL":
-                diff = -diff
-                
-            if price > 0:
-                return {
-                    "success": True,
-                    "ticker": ticker,
-                    "price": price,
-                    "diff": diff,
-                    "rate": float(rate_str) if rate_str.replace(".", "", 1).isdigit() else 0.0,
-                    "source": "naver"
-                }
-    except Exception:
-        pass
 
-    # 2. 다음 금융 모바일 API 폴백
+    result = {}
     try:
-        daum_url = f"https://m.finance.daum.net/api/quotes/A{ticker}?summary=1"
-        daum_headers = {
-            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X)",
-            "Referer": "https://m.finance.daum.net/"
-        }
-        req = urllib.request.Request(daum_url, headers=daum_headers)
-        with urllib.request.urlopen(req, timeout=3) as resp:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=5) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            price = int(data.get("tradePrice", 0))
-            diff = int(data.get("changePrice", 0))
-            if data.get("change") == "FALL":
-                diff = -diff
-            rate = float(data.get("changeRate", 0.0)) * 100
-            if price > 0:
-                return {
-                    "success": True,
-                    "ticker": ticker,
-                    "price": price,
-                    "diff": diff,
-                    "rate": round(rate, 2),
-                    "source": "daum"
-                }
-    except Exception:
-        pass
+            items = data.get("result", {}).get("areas", [{}])[0].get("datas", [])
+            for item in items:
+                code = item.get("cd")
+                price = int(item.get("nv", 0))          # 현재가
+                diff = int(item.get("cv", 0))           # 전일 대비
+                rate = float(item.get("cr", 0.0))       # 등락률
+                # 하락/상승 부호 반영
+                rf = item.get("rf", "3") # 4: 하한, 5: 하락, 2: 상승, 1: 상한
+                if rf in ["4", "5"]:
+                    diff = -abs(diff)
+                    rate = -abs(rate)
 
-    return {"success": False, "ticker": ticker, "error": "Fetch failed"}
+                if price > 0:
+                    result[code] = {
+                        "success": True,
+                        "ticker": code,
+                        "price": price,
+                        "diff": diff,
+                        "rate": rate,
+                        "source": "naver_polling"
+                    }
+    except Exception as e:
+        print(f"Fetch batch failed: {e}")
+
+    # 실패한 종목은 개별 폴백
+    for t in tickers:
+        if t not in result:
+            result[t] = {"success": False, "ticker": t, "error": "Fetch failed"}
+
+    return result
 
 class StockRadarHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -101,23 +77,18 @@ class StockRadarHandler(SimpleHTTPRequestHandler):
         path = parsed.path
         query = urllib.parse.parse_qs(parsed.query)
 
-        # 실시간 주가 API 엔드포인트
         if path == "/api/prices":
             tickers_arg = query.get("tickers", [""])
-            tickers = tickers_arg[0].split(",") if tickers_arg and tickers_arg[0] else []
-            data = {}
-            for t in tickers:
-                t = t.strip()
-                if t:
-                    data[t] = fetch_live_stock_price(t)
+            tickers = [t.strip() for t in tickers_arg[0].split(",") if t.strip()] if tickers_arg else []
+            data = fetch_batch_prices(tickers)
+            
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
             self.wfile.write(json.dumps({"success": True, "prices": data}, ensure_ascii=False).encode("utf-8"))
             return
 
-        # 대시보드 메인 페이지 서빙
-        if path == "/" or path == "/dashboard":
+        if path in ["/", "/dashboard"]:
             html_file_path = os.path.join(DIR_PATH, "dashboard.html")
             if os.path.exists(html_file_path):
                 self.send_response(200)
@@ -132,25 +103,10 @@ class StockRadarHandler(SimpleHTTPRequestHandler):
 def main():
     server_address = ("0.0.0.0", PORT)
     httpd = HTTPServer(server_address, StockRadarHandler)
-    url = f"http://localhost:{PORT}"
-    
-    print("\n" + "=" * 65)
-    print("🚀 [Buy Zone Radar] 실시간 증권 데이터 연동 엔진 가동 완료!")
-    print(f"📡 서버 주소: {url}")
-    print("✨ 실제 거래소/증권사 실시간 시세 파이프라인 직결 활성화")
-    print("=" * 65 + "\n")
-    print(f"👉 브라우저가 자동으로 열리지 않으면 주소창에 {url} 을 입력해 주세요.")
-    print("👉 종료하려면 터미널에서 Ctrl + C 를 누르세요.\n")
-
-    try:
-        webbrowser.open(url)
-    except Exception:
-        pass
-
+    print(f"🚀 Stock Radar Server running on port {PORT}")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print("\n서버를 종료합니다.")
         httpd.server_close()
 
 if __name__ == "__main__":
