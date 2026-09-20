@@ -3,6 +3,9 @@
   "functions": {
     "api/prices.py": {
       "maxDuration": 10
+    },
+    "api/search.py": {
+      "maxDuration": 10
     }
   },
   "rewrites": [
