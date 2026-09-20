@@ -190,7 +190,7 @@
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="block text-gray-400 mb-1">현재가 (원) *</label>
-            <input type="number" id="inputCurrentPrice" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-2 text-white focus:border-blue-500 focus:outline-none">
+            <input type="number" id="inputCurrentPrice" onchange="autoCalculateIfCustom()" required class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2.5 py-2 text-white focus:border-blue-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-emerald-400 mb-1">Buy Zone 하단 *</label>
@@ -326,7 +326,7 @@
         buyZoneHigh: 77000,
         stopLoss: 71000,
         aiScore: 88,
-        aliases: ['삼성전자', '삼전', '005930'],
+        aliases: ['삼성전자', '삼전', '삼성', '005930'],
         aiReason: 'HBM3E 엔비디아 공급 퀄테스트 통과 기대 및 3nm 파운드리 수율 개선',
         aiRisk: '레거시 D램 가격 반등 지연 및 중국 메모리 증설 하방 압력',
         provenance: {
@@ -719,7 +719,7 @@
       }).join('');
     }
 
-    // Modal & Realtime Logic
+    // Modal & Search Logic
     function openAddModal() {
       document.getElementById('addModal').classList.remove('hidden');
       renderQuickPills();
@@ -727,6 +727,7 @@
     function closeAddModal() {
       document.getElementById('addModal').classList.add('hidden');
       document.getElementById('addStockForm').reset();
+      document.getElementById('searchResultsDropdown').classList.add('hidden');
     }
     function renderQuickPills() {
       const pillsContainer = document.getElementById('quickPills');
@@ -742,6 +743,37 @@
           + ${item.label}
         </button>
       `).join('');
+    }
+    function handleSmartSearch(keyword) {
+      const dropdown = document.getElementById('searchResultsDropdown');
+      const trimmed = keyword.trim().toLowerCase();
+      if (!trimmed) {
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      const matches = STOCK_KNOWLEDGE_BASE.filter(s => 
+        s.name.toLowerCase().includes(trimmed) || 
+        s.ticker.includes(trimmed) || 
+        (s.aliases && s.aliases.some(a => a.toLowerCase().includes(trimmed)))
+      );
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = `<div class="p-2.5 text-gray-500 text-center text-xs">일치하는 프리셋이 없습니다.</div>`;
+        dropdown.classList.remove('hidden');
+        return;
+      }
+
+      dropdown.innerHTML = matches.map(stock => `
+        <div onclick="selectStockByTicker('${stock.ticker}'); document.getElementById('searchResultsDropdown').classList.add('hidden');" class="p-2 hover:bg-gray-800 cursor-pointer flex justify-between items-center text-xs border-b border-gray-800 last:border-0">
+          <div>
+            <span class="font-bold text-white">${stock.name}</span>
+            <span class="text-[10px] text-gray-400">(${stock.ticker})</span>
+          </div>
+          <span class="text-emerald-400 font-mono">${formatKRW(stock.currentPrice)}</span>
+        </div>
+      `).join('');
+      dropdown.classList.remove('hidden');
     }
     function selectStockByTicker(ticker) {
       const found = STOCK_KNOWLEDGE_BASE.find(s => s.ticker === ticker);
@@ -760,6 +792,19 @@
           document.getElementById('inputTargetPrice').value = found.provenance.targetPrice;
         }
       }
+    }
+    function autoCalculateIfCustom() {
+      const price = Number(document.getElementById('inputCurrentPrice').value);
+      if (!price) return;
+      const lowInput = document.getElementById('inputBuyLow');
+      const highInput = document.getElementById('inputBuyHigh');
+      const stopInput = document.getElementById('inputStopLoss');
+      const targetInput = document.getElementById('inputTargetPrice');
+
+      if (!highInput.value) highInput.value = Math.round((price * 0.98) / 100) * 100;
+      if (!lowInput.value) lowInput.value = Math.round((price * 0.94) / 100) * 100;
+      if (!stopInput.value) stopInput.value = Math.round((price * 0.90) / 100) * 100;
+      if (!targetInput.value) targetInput.value = Math.round((price * 1.20) / 100) * 100;
     }
     function handleAddStock(e) {
       e.preventDefault();
