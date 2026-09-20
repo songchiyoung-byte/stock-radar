@@ -1443,6 +1443,17 @@
               <p class="text-[10px] text-slate-500 mt-1">
                 ${diagnosis.desc}
               </p>
+
+              ${/^[0-9]{6}$/.test(stock.ticker)
+                ? `
+                  <button
+                    type="button"
+                    onclick="runTechnicalAnalysis('${stock.id}')"
+                    class="mt-2 text-[10px] font-semibold text-blue-400 hover:text-blue-300">
+                    ↻ 최신 일봉 재분석
+                  </button>
+                `
+                : ''}
             </div>
 
             <div class="mt-2">
