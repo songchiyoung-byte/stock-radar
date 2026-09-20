@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Buy Zone Radar - 실시간 매수 타이밍 & 밸류에이션 판별기</title>
+  <title>Buy Zone Radar v2</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -20,154 +21,446 @@
             finBlue: '#3B82F6'
           },
           fontFamily: {
-            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+            sans: [
+              'Pretendard',
+              '-apple-system',
+              'BlinkMacSystemFont',
+              'system-ui',
+              'sans-serif'
+            ]
           }
         }
       }
-    }
+    };
   </script>
+
   <style>
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    @keyframes pulseSoft {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
     }
-    .pulse-soft { animation: pulseSoft 2s infinite ease-in-out; }
+
+    .no-scrollbar {
+      scrollbar-width: none;
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.58;
+      }
+    }
+
+    .pulse-soft {
+      animation: pulseSoft 2s infinite ease-in-out;
+    }
   </style>
 </head>
-<body class="bg-finBg text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500 selection:text-white">
 
-  <div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-11/12 max-w-sm pointer-events-none transition-all"></div>
+<body class="bg-finBg text-slate-100 min-h-screen font-sans antialiased selection:bg-blue-500 selection:text-white">
 
-  <!-- Main Container -->
-  <div class="w-full max-w-lg mx-auto flex-1 flex flex-col pb-24 shadow-2xl relative border-x border-slate-800 bg-finBg">
+  <div
+    id="toastContainer"
+    class="fixed top-4 left-1/2 -translate-x-1/2 z-[70] flex flex-col gap-2 w-11/12 max-w-sm pointer-events-none">
+  </div>
 
-    <!-- Top Header -->
+  <div class="w-full max-w-lg mx-auto min-h-screen pb-24 border-x border-slate-800 bg-finBg shadow-2xl">
+
     <header class="sticky top-0 z-30 bg-finBg/95 backdrop-blur-md px-4 pt-3.5 pb-2.5 border-b border-finBorder">
+
       <div class="flex items-center justify-between mb-3">
         <div>
           <h1 class="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
             Buy Zone Radar
-            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">PRO</span>
+
+            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              V2
+            </span>
           </h1>
-          <p class="text-[11px] text-slate-400 mt-0.5">실시간 매수 타이밍 & 밸류에이션 판별기</p>
+
+          <p class="text-[11px] text-slate-400 mt-0.5">
+            근거 추적형 매수 구간 판별기
+          </p>
         </div>
 
-        <button onclick="openAddModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white shadow-md shadow-blue-600/20 active:scale-95 transition">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-          <span>종목 검색·체크</span>
+        <button
+          onclick="openAddModal()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-semibold shadow active:scale-95 transition">
+          ＋ 종목 등록
         </button>
       </div>
 
-      <!-- Realtime Status Ribbon -->
-      <div class="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-slate-900/90 border border-slate-800 text-[11px]">
+      <div
+        id="statusRibbon"
+        class="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-slate-900/90 border border-slate-800 text-[11px]">
+
         <div class="flex items-center gap-2">
           <span class="relative flex h-2 w-2">
-            <span id="livePing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <span
+              id="livePing"
+              class="hidden animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75">
+            </span>
+
+            <span
+              id="liveDot"
+              class="relative inline-flex rounded-full h-2 w-2 bg-slate-500">
+            </span>
           </span>
-          <span id="liveStatusText" class="font-medium text-emerald-400">증권사 실시간 시세 연동</span>
+
+          <span
+            id="liveStatusText"
+            class="font-medium text-slate-400">
+            연결 확인 중
+          </span>
         </div>
-        <span id="lastUpdatedTime" class="text-[10px] text-slate-400 font-mono">연결 중...</span>
+
+        <span
+          id="lastUpdatedTime"
+          class="text-[10px] text-slate-500 font-mono">
+          미갱신
+        </span>
       </div>
 
-      <!-- Two Core Tabs: 1) AI 추천 / 2) 내 관심 판별기 -->
       <div class="grid grid-cols-2 gap-1.5 mt-2.5 p-1 bg-slate-900 rounded-lg border border-slate-800 text-xs font-semibold">
-        <button onclick="switchMainTab('AI_PICKS')" id="tabBtnAi" class="py-1.5 rounded-md text-center transition-all bg-blue-600 text-white shadow font-bold">
-          🤖 AI 매수추천 (<span id="countAiPicks">0</span>)
+
+        <button
+          onclick="switchMainTab('AI_PICKS')"
+          id="tabBtnAi"
+          class="py-1.5 rounded-md bg-blue-600 text-white shadow font-bold">
+          AI 조건충족 (<span id="countAiPicks">0</span>)
         </button>
-        <button onclick="switchMainTab('WATCHLIST')" id="tabBtnWatch" class="py-1.5 rounded-md text-center transition-all text-slate-400 hover:text-white">
-          📋 내 판별 장바구니 (<span id="countWatchlist">0</span>)
+
+        <button
+          onclick="switchMainTab('WATCHLIST')"
+          id="tabBtnWatch"
+          class="py-1.5 rounded-md text-slate-400 hover:text-white">
+          내 관심종목 (<span id="countWatchlist">0</span>)
         </button>
       </div>
     </header>
 
-    <!-- Content List -->
-    <main class="flex-1 px-4 py-3 space-y-3" id="stockListContainer"></main>
+    <main
+      class="px-4 py-3 space-y-3"
+      id="stockListContainer">
+    </main>
 
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden flex-col items-center justify-center py-16 px-4 text-center">
-      <div class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-500 mb-2">🔍</div>
-      <h3 class="text-sm font-semibold text-slate-300">표시할 종목이 없습니다</h3>
-      <p class="text-xs text-slate-500 mt-1">상단의 '종목 검색·체크' 버튼을 눌러 관심 종목을 추가해 보세요.</p>
+    <div
+      id="emptyState"
+      class="hidden flex-col items-center justify-center py-16 px-4 text-center">
+
+      <div class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-500 mb-2">
+        🔍
+      </div>
+
+      <h3 class="text-sm font-semibold text-slate-300">
+        표시할 종목이 없습니다
+      </h3>
+
+      <p
+        id="emptyStateText"
+        class="text-xs text-slate-500 mt-1">
+      </p>
     </div>
   </div>
 
-  <!-- Search & Valuation Modal -->
-  <div id="addModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-finCard w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-finBorder p-5 max-h-[90vh] overflow-y-auto shadow-2xl">
+  <div
+    id="addModal"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-end sm:items-center justify-center sm:p-4">
+
+    <div class="bg-finCard w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-finBorder p-5 max-h-[92vh] overflow-y-auto shadow-2xl">
+
       <div class="flex items-center justify-between pb-3 border-b border-slate-700 mb-3">
         <div>
-          <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
-            <span>🔍 종목 검색 & Buy Zone 즉시 판별</span>
+          <h2 class="text-sm font-bold text-white">
+            종목 및 검증된 가격 모델 등록
           </h2>
-          <p class="text-[11px] text-slate-400">티커(6자리) 또는 종목명을 입력하세요</p>
+
+          <p class="text-[11px] text-slate-400">
+            현재가만으로 Buy Zone을 자동 생성하지 않습니다.
+          </p>
         </div>
-        <button onclick="closeAddModal()" class="text-slate-400 hover:text-white p-1 text-sm font-bold">✕</button>
+
+        <button
+          onclick="closeAddModal()"
+          class="text-slate-400 hover:text-white p-1">
+          ✕
+        </button>
       </div>
 
       <div class="mb-4">
-        <input type="text" id="smartSearchInput" oninput="handleSmartSearch(this.value)" placeholder="예: 하이닉스, 삼성전자, S&P500, 005930..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none font-medium">
-        <div id="searchResultsDropdown" class="hidden mt-1 max-h-48 overflow-y-auto rounded-lg bg-slate-950 border border-slate-700 divide-y divide-slate-800 text-xs"></div>
-        <div class="mt-2 flex flex-wrap gap-1" id="quickPills"></div>
+
+        <input
+          type="text"
+          id="smartSearchInput"
+          oninput="handleSmartSearch(this.value)"
+          placeholder="예: 삼성전자, 005930"
+          class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none">
+
+        <div
+          id="searchResultsDropdown"
+          class="hidden mt-1 max-h-44 overflow-y-auto rounded-lg bg-slate-950 border border-slate-700 divide-y divide-slate-800">
+        </div>
+
+        <div
+          class="mt-2 flex flex-wrap gap-1"
+          id="quickPills">
+        </div>
       </div>
 
-      <form id="addStockForm" onsubmit="handleAddStock(event)" class="space-y-3 text-xs">
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-slate-400 mb-1">종목명</label>
-            <input type="text" id="inputName" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">티커(6자리)</label>
-            <input type="text" id="inputTicker" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono">
-          </div>
-        </div>
+      <form
+        id="addStockForm"
+        onsubmit="handleAddStock(event)"
+        class="space-y-3 text-xs">
 
         <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label class="block text-slate-400 mb-1">현재가 (원)</label>
-            <input type="number" id="inputCurrentPrice" onchange="autoCalculateBuyZone()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
+
+          <div class="col-span-2">
+            <label class="block text-slate-400 mb-1">
+              종목명
+            </label>
+
+            <input
+              id="inputName"
+              required
+              class="w-full input-style">
           </div>
+
           <div>
-            <label class="block text-emerald-400 mb-1">Buy Zone 하단</label>
-            <input type="number" id="inputBuyLow" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
-          </div>
-          <div>
-            <label class="block text-emerald-400 mb-1">Buy Zone 상단</label>
-            <input type="number" id="inputBuyHigh" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
+            <label class="block text-slate-400 mb-1">
+              시장
+            </label>
+
+            <select
+              id="inputMarket"
+              required
+              class="w-full input-style">
+
+              <option>KOSPI</option>
+              <option>KOSDAQ</option>
+              <option>ETF</option>
+              <option>NYSE</option>
+              <option>NASDAQ</option>
+            </select>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
+
           <div>
-            <label class="block text-rose-400 mb-1">손절선(Stop)</label>
-            <input type="number" id="inputStopLoss" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+            <label class="block text-slate-400 mb-1">
+              티커
+            </label>
+
+            <input
+              id="inputTicker"
+              required
+              class="w-full input-style font-mono">
           </div>
+
           <div>
-            <label class="block text-blue-400 mb-1">상승 목표가</label>
-            <input type="number" id="inputTargetPrice" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+            <label class="block text-slate-400 mb-1">
+              현재가
+            </label>
+
+            <input
+              type="number"
+              id="inputCurrentPrice"
+              min="0"
+              required
+              class="w-full input-style">
+          </div>
+        </div>
+
+        <div class="rounded-lg border border-emerald-700/40 bg-emerald-950/20 p-2.5">
+
+          <p class="text-[10px] text-emerald-300 mb-2">
+            Entry Model — 밸류에이션·지지선 근거로 직접 입력
+          </p>
+
+          <div class="grid grid-cols-2 gap-2">
+
+            <div>
+              <label class="block text-slate-400 mb-1">
+                Buy Zone 하단
+              </label>
+
+              <input
+                type="number"
+                id="inputBuyLow"
+                min="0"
+                required
+                class="w-full input-style">
+            </div>
+
+            <div>
+              <label class="block text-slate-400 mb-1">
+                Buy Zone 상단
+              </label>
+
+              <input
+                type="number"
+                id="inputBuyHigh"
+                min="0"
+                required
+                class="w-full input-style">
+            </div>
+
+            <div>
+              <label class="block text-rose-400 mb-1">
+                손절선
+              </label>
+
+              <input
+                type="number"
+                id="inputStopLoss"
+                min="0"
+                required
+                class="w-full input-style">
+            </div>
+
+            <div>
+              <label class="block text-blue-400 mb-1">
+                Base 적정가
+              </label>
+
+              <input
+                type="number"
+                id="inputFairValue"
+                min="0"
+                required
+                class="w-full input-style">
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+
+          <div>
+            <label class="block text-slate-400 mb-1">
+              기초 지표 (BPS/EPS 등)
+            </label>
+
+            <input
+              type="number"
+              step="any"
+              id="inputBaseMetric"
+              min="0"
+              class="w-full input-style">
+          </div>
+
+          <div>
+            <label class="block text-slate-400 mb-1">
+              목표 배수
+            </label>
+
+            <input
+              type="number"
+              step="any"
+              id="inputTargetMultiple"
+              min="0"
+              class="w-full input-style">
           </div>
         </div>
 
         <div>
-          <label class="block text-slate-400 mb-1">적용 밸류에이션 모델 (Provenance)</label>
-          <input type="text" id="inputModel" placeholder="예: 12M Fwd P/B 밴드 하단 모델" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+          <label class="block text-slate-400 mb-1">
+            밸류에이션 모델
+          </label>
+
+          <input
+            id="inputModel"
+            placeholder="예: 12M Forward BPS × Target P/B"
+            required
+            class="w-full input-style">
         </div>
 
-        <div class="flex items-center gap-2 pt-2">
-          <button type="button" onclick="closeAddModal()" class="flex-1 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold">취소</button>
-          <button type="submit" class="flex-1 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow">판별 목록에 추가</button>
+        <div>
+          <label class="block text-slate-400 mb-1">
+            기술적 근거
+          </label>
+
+          <input
+            id="inputTechPoint"
+            placeholder="예: 120일선·거래량 매물대 중첩"
+            required
+            class="w-full input-style">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">
+            데이터 출처
+          </label>
+
+          <input
+            id="inputSource"
+            placeholder="예: DART, FnGuide 컨센서스"
+            required
+            class="w-full input-style">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+
+          <div>
+            <label class="block text-slate-400 mb-1">
+              기준일
+            </label>
+
+            <input
+              type="date"
+              id="inputAsOfDate"
+              required
+              class="w-full input-style">
+          </div>
+
+          <label class="flex items-center gap-2 mt-5 text-slate-300">
+            <input
+              type="checkbox"
+              id="inputAiRecommended"
+              class="accent-blue-500">
+
+            AI 선정 유니버스
+          </label>
+        </div>
+
+        <div
+          id="formError"
+          class="hidden rounded-md border border-rose-500/40 bg-rose-500/10 text-rose-300 p-2 text-[11px]">
+        </div>
+
+        <div class="flex gap-2 pt-2">
+
+          <button
+            type="button"
+            onclick="closeAddModal()"
+            class="flex-1 py-2 rounded-lg bg-slate-700 text-slate-300 font-semibold">
+            취소
+          </button>
+
+          <button
+            type="submit"
+            class="flex-1 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">
+            검증 후 추가
+          </button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
+    document.querySelectorAll('.input-style').forEach((element) => {
+      element.className +=
+        ' bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-blue-500 focus:outline-none';
+    });
+
+    const STORAGE_KEY = 'STOCK_RADAR_DATA_V2_PROVENANCE_20260920';
+    const API_TIMEOUT_MS = 6500;
+    const REFRESH_MS = 5000;
+    const STALE_AFTER_MS = 20000;
+
     let currentMainTab = 'AI_PICKS';
-    // 스토리지 키 버전을 올려 구버전(7만 원대) 캐시를 즉각 자동 무효화
-    const STORAGE_KEY = 'STOCK_RADAR_DATA_V2026_PRICE_SYNCED_V4';
+    let lastSuccessfulSync = null;
 
     const STOCK_DATABASE = [
       {
@@ -180,17 +473,34 @@
         buyZoneHigh: 255000,
         stopLoss: 235000,
         isAiRecommended: false,
-        provenance: {
-          model: '12M Forward P/B 밴드 평가 모델',
-          targetPrice: 310000,
-          targetMultiple: 'P/B 1.45x',
-          historicalBand: '역사적 밴드 중하단',
-          riskReward: '1 : 4.2',
-          techPoint: '직전 고점 돌파 후 지지선 확인',
-          thesis: '차세대 HBM 공급 가시화 및 파운드리 수율 개선',
-          risk: '글로벌 반도체 수급 사이클 변동성'
-        }
+
+        valuation: {
+          model: '12M Forward BPS × Target P/B',
+          baseMetricLabel: '12M Forward BPS',
+          baseMetricValue: 213800,
+          targetMultipleLabel: 'Target P/B',
+          targetMultipleValue: 1.45,
+          fairValue: 310000,
+          bearValue: 270000,
+          bullValue: 345000
+        },
+
+        entryModel: {
+          fairValueDiscountLow: 17.7,
+          fairValueDiscountHigh: 21.0,
+          technicalSupport: 252000,
+          volatilityAdjustment: -1.2,
+          techPoint: '직전 고점 돌파 후 지지선 확인'
+        },
+
+        thesis: '차세대 HBM 공급 가시화 및 파운드리 수율 개선',
+        risk: '글로벌 반도체 수급 사이클 변동성',
+        source: '샘플 데이터 — 실제 사용 전 원천 확인 필요',
+        asOfDate: '2026-09-20',
+        lastCalculatedAt: '2026-09-20T06:00:00Z',
+        provenanceVerified: false
       },
+
       {
         name: 'SK하이닉스',
         ticker: '000660',
@@ -201,17 +511,32 @@
         buyZoneHigh: 1780000,
         stopLoss: 1590000,
         isAiRecommended: false,
-        provenance: {
-          model: '12M Forward PER 밴드 회귀 모델',
-          targetPrice: 2100000,
-          targetMultiple: 'PER 7.2x',
-          historicalBand: '역사적 중간 밴드 (48%)',
-          riskReward: '1 : 2.9',
-          techPoint: '전고점 돌파 후 60일 이평선 지지 확인 구간',
-          thesis: 'HBM3E 독점적 지위 지속 및 빅테크 AI 가속기 탑재량 확대',
-          risk: '빅테크 CapEx 속도 조절 및 고점 밸류에이션 단기 부담'
-        }
+
+        valuation: {
+          model: '12M Forward EPS × Target PER',
+          baseMetricLabel: '12M Forward EPS',
+          baseMetricValue: null,
+          targetMultipleLabel: 'Target PER',
+          targetMultipleValue: 7.2,
+          fairValue: 2100000,
+          bearValue: null,
+          bullValue: null
+        },
+
+        entryModel: {
+          technicalSupport: 1750000,
+          volatilityAdjustment: null,
+          techPoint: '전고점 돌파 후 60일선 지지 확인 구간'
+        },
+
+        thesis: 'HBM 수요와 AI 가속기 탑재량 확대',
+        risk: '빅테크 CapEx 둔화 및 고점 밸류에이션 부담',
+        source: '샘플 데이터 — 실제 사용 전 원천 확인 필요',
+        asOfDate: '2026-09-20',
+        lastCalculatedAt: '2026-09-20T06:00:00Z',
+        provenanceVerified: false
       },
+
       {
         name: 'TIGER 미국S&P500',
         ticker: '360750',
@@ -222,486 +547,1492 @@
         buyZoneHigh: 25900,
         stopLoss: 23500,
         isAiRecommended: true,
-        provenance: {
-          model: 'S&P 500 Forward P/E 19.5x 밴드 하단',
-          targetPrice: 31000,
-          targetMultiple: 'P/E 21.5x (정상 복귀치)',
-          historicalBand: '지수 기술적 조정 중간 밴드 (52%)',
-          riskReward: '1 : 3.8',
-          techPoint: '120일 이동평균선 이격도 98% 눌림목 지지선',
-          thesis: '미국 500대 기업 분산 및 장기 복리 우상향 코어 자산',
-          risk: '원/달러 환율 급락에 따른 환차손 변동성'
-        }
-      },
-      {
-        name: '두산에너빌리티',
-        ticker: '034020',
-        market: 'KOSPI',
-        currentPrice: 85700,
-        dayChangeRate: 1.18,
-        buyZoneLow: 83000,
-        buyZoneHigh: 86500,
-        stopLoss: 78000,
-        isAiRecommended: true,
-        provenance: {
-          model: '원전 수주잔고 P/B 배수 모델',
-          targetPrice: 98000,
-          targetMultiple: 'P/B 1.35x',
-          historicalBand: '하위 18% 저평가 구간',
-          riskReward: '1 : 3.1',
-          techPoint: '박스권 중단 지지선 확인',
-          thesis: '체코 원전 수주 및 글로벌 SMR 파운드리 수혜 독점',
-          risk: '원전 착공 일정 변동 및 정책 피로감'
-        }
-      },
-      {
-        name: 'NAVER',
-        ticker: '035420',
-        market: 'KOSPI',
-        currentPrice: 197500,
-        dayChangeRate: 0.76,
-        buyZoneLow: 190000,
-        buyZoneHigh: 198000,
-        stopLoss: 175000,
-        isAiRecommended: true,
-        provenance: {
-          model: '10년 최저 P/E 밴드 회귀 모델',
-          targetPrice: 225000,
-          targetMultiple: 'PER 15.2x (역사적 하단)',
-          historicalBand: '하위 3.1% 극단적 저평가',
-          riskReward: '1 : 5.9',
-          techPoint: '주봉 쌍바닥 지지 라인 형성',
-          thesis: 'AI 검색 브리핑 도입에 따른 광고 단가 회복 및 커머스 쇄신',
-          risk: '중국 C-커머스 경쟁 심화 및 AI 인프라 투자 비용'
-        }
+
+        valuation: {
+          model: '지수 Forward P/E 및 환율 보정',
+          baseMetricLabel: 'Forward EPS',
+          baseMetricValue: null,
+          targetMultipleLabel: 'Target P/E',
+          targetMultipleValue: 21.5,
+          fairValue: 31000,
+          bearValue: null,
+          bullValue: null
+        },
+
+        entryModel: {
+          technicalSupport: 25500,
+          volatilityAdjustment: null,
+          techPoint: '120일 이동평균선 및 환율 민감도 확인'
+        },
+
+        thesis: '미국 대형주 분산 장기 코어 자산',
+        risk: '미국 밸류에이션 및 원/달러 환율 변동성',
+        source: '샘플 데이터 — 실제 사용 전 원천 확인 필요',
+        asOfDate: '2026-09-20',
+        lastCalculatedAt: '2026-09-20T06:00:00Z',
+        provenanceVerified: false
       }
     ];
 
     let userStocks = loadStocks();
 
+    function hydrateStock(stock) {
+      return {
+        ...stock,
+        id: stock.id || `stock-${stock.ticker}`,
+        inWatchlist:
+          stock.inWatchlist ??
+          ['005930', '000660', '360750'].includes(stock.ticker),
+        expanded: false
+      };
+    }
+
     function loadStocks() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) return JSON.parse(saved);
-      } catch (e) {}
-      // 기본 장바구니에 삼성전자, SK하이닉스, TIGER 미국S&P500 배치
-      return STOCK_DATABASE.map(s => ({
-        ...s,
-        id: 'stock-' + s.ticker,
-        inWatchlist: (s.ticker === '005930' || s.ticker === '000660' || s.ticker === '360750'),
-        expanded: false
-      }));
+
+        if (saved) {
+          return JSON.parse(saved).map(hydrateStock);
+        }
+      } catch (error) {
+        console.warn('저장된 종목 데이터를 불러오지 못했습니다.', error);
+      }
+
+      return STOCK_DATABASE.map(hydrateStock);
     }
 
     function saveStocks() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(userStocks));
-      } catch (e) {}
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(userStocks)
+        );
+      } catch (error) {
+        console.warn('종목 데이터를 저장하지 못했습니다.', error);
+      }
+    }
+
+    function numberOrNull(value) {
+      if (
+        value === null ||
+        value === undefined ||
+        value === ''
+      ) {
+        return null;
+      }
+
+      return Number(value);
+    }
+
+    function formatKRW(value) {
+      if (!Number.isFinite(Number(value))) {
+        return '-';
+      }
+
+      return `${Number(value).toLocaleString('ko-KR')}원`;
+    }
+
+    function formatDateTime(value) {
+      if (!value) {
+        return '-';
+      }
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+
+      return date.toLocaleString('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        hour12: false
+      });
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? '').replace(
+        /[&<>'"]/g,
+        (character) => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        })[character]
+      );
+    }
+
+    function calculateRiskReward(stock) {
+      const entry =
+        (
+          Number(stock.buyZoneLow) +
+          Number(stock.buyZoneHigh)
+        ) / 2;
+
+      const stop = Number(stock.stopLoss);
+      const target = Number(stock.valuation?.fairValue);
+
+      const risk = entry - stop;
+      const reward = target - entry;
+
+      if (
+        ![entry, stop, target, risk, reward].every(Number.isFinite) ||
+        risk <= 0 ||
+        reward <= 0
+      ) {
+        return null;
+      }
+
+      return {
+        entry,
+        risk,
+        reward,
+        ratio: reward / risk
+      };
     }
 
     function diagnoseStock(stock) {
-      const p = stock.currentPrice;
-      const low = stock.buyZoneLow;
-      const high = stock.buyZoneHigh;
-      const stop = stock.stopLoss;
+      const currentPrice = Number(stock.currentPrice);
+      const buyLow = Number(stock.buyZoneLow);
+      const buyHigh = Number(stock.buyZoneHigh);
+      const stopLoss = Number(stock.stopLoss);
 
-      if (p < stop) {
-        const diff = (((stop - p) / stop) * 100).toFixed(1);
+      if (
+        ![currentPrice, buyLow, buyHigh, stopLoss].every(Number.isFinite) ||
+        !(stopLoss < buyLow && buyLow <= buyHigh)
+      ) {
+        return {
+          status: 'INVALID',
+          badgeText: '⚠ 모델 오류',
+          badgeClass:
+            'bg-rose-500/20 text-rose-300 border-rose-500/40',
+          title: '가격 모델 점검 필요',
+          desc:
+            '손절선 < Buy Zone 하단 ≤ 상단 조건을 확인하세요.',
+          posType: 'NEUTRAL'
+        };
+      }
+
+      if (currentPrice < stopLoss) {
+        const difference =
+          ((stopLoss - currentPrice) / stopLoss) * 100;
+
         return {
           status: 'STOP_LOSS',
-          badgeText: `손절선 이탈 (-${diff}%)`,
-          badgeClass: 'bg-rose-500/20 text-rose-400 border-rose-500/40',
-          title: '매수 보류 / 리스크 관리',
-          desc: `지지선(${stop.toLocaleString()}원)을 하회했습니다. 추가 하락 위험으로 진입을 멈춥니다.`,
-          isInside: false,
+          badgeText:
+            `손절선 이탈 (-${difference.toFixed(1)}%)`,
+          badgeClass:
+            'bg-rose-500/20 text-rose-300 border-rose-500/40',
+          title: '신규 매수 보류',
+          desc:
+            `손절선 ${formatKRW(stopLoss)} 아래입니다. ` +
+            '모델과 투자 논리를 재검토하세요.',
           posType: 'BELOW'
         };
       }
 
-      if (p >= low && p <= high) {
-        const mid = (low + high) / 2;
-        const step = p <= mid ? '2차 적극 분할 (40%)' : '1차 분할 진입 (30%)';
+      if (currentPrice < buyLow) {
+        const difference =
+          ((buyLow - currentPrice) / buyLow) * 100;
+
+        return {
+          status: 'BELOW_ZONE',
+          badgeText:
+            `밴드 하단 아래 (-${difference.toFixed(1)}%)`,
+          badgeClass:
+            'bg-violet-500/20 text-violet-300 border-violet-500/40',
+          title: '가격 하락 원인 재검증',
+          desc:
+            '싸졌다는 이유만으로 매수하지 말고 펀더멘털 훼손 여부를 먼저 확인하세요.',
+          posType: 'BELOW_ZONE'
+        };
+      }
+
+      if (currentPrice <= buyHigh) {
+        const midpoint = (buyLow + buyHigh) / 2;
+
+        const step =
+          currentPrice <= midpoint
+            ? '2차 적극 분할 후보'
+            : '1차 분할 후보';
+
         return {
           status: 'IN_ZONE',
-          badgeText: `🎯 매수 적기 (${step})`,
-          badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 pulse-soft font-bold',
-          title: 'System Buy Zone 진입 (안전마진 확보)',
-          desc: `적정 밸류에이션 밴드 내에 위치하여 분할 매수가 안전한 구간입니다.`,
-          isInside: true,
+          badgeText: `🎯 ${step}`,
+          badgeClass:
+            'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 pulse-soft font-bold',
+          title: 'Buy Zone 진입',
+          desc:
+            '가격 조건을 충족했습니다. 최신 산출근거와 리스크 확인 후 집행하세요.',
           posType: 'INSIDE'
         };
       }
 
-      if (p > high) {
-        const gap = (((p - high) / high) * 100).toFixed(1);
-        const isNear = (p - high) / high <= 0.03;
+      const gap =
+        ((currentPrice - buyHigh) / buyHigh) * 100;
+
+      if (gap <= 1) {
         return {
-          status: isNear ? 'APPROACHING' : 'OVER_PRICED',
-          badgeText: isNear ? `⚡ 밴드 근접 (+${gap}%)` : `⛔ 매수 범위 초과 (+${gap}%)`,
-          badgeClass: isNear ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-slate-800 text-slate-400 border-slate-700',
-          title: isNear ? '진입 대기 (1~2% 조정 시 매수)' : '관망 (추격 매수 금지)',
-          desc: `적정 매수 상단(${high.toLocaleString()}원)보다 ${gap}% 비쌉니다. 가격 조정을 기다리세요.`,
-          isInside: false,
+          status: 'IMMINENT',
+          badgeText: `⚡ 임박 (+${gap.toFixed(1)}%)`,
+          badgeClass:
+            'bg-amber-500/20 text-amber-300 border-amber-500/40',
+          title: '매수구간 임박',
+          desc:
+            `상단까지 약 ${gap.toFixed(1)}% 조정이 필요합니다.`,
+          posType: 'ABOVE',
+          gap
+        };
+      }
+
+      if (gap <= 3) {
+        return {
+          status: 'APPROACHING',
+          badgeText: `접근 중 (+${gap.toFixed(1)}%)`,
+          badgeClass:
+            'bg-orange-500/20 text-orange-300 border-orange-500/40',
+          title: '접근 중 · 아직 관망',
+          desc:
+            `Buy Zone 상단보다 ${gap.toFixed(1)}% 높습니다. 추격하지 않습니다.`,
           posType: 'ABOVE',
           gap
         };
       }
 
       return {
-        status: 'WATCH',
-        badgeText: '관망',
-        badgeClass: 'bg-slate-800 text-slate-400 border-slate-700',
-        title: '관망 대기',
-        desc: '현재가 추이를 관찰합니다.',
-        isInside: false,
-        posType: 'NEUTRAL'
+        status: 'OVER_PRICED',
+        badgeText: `범위 초과 (+${gap.toFixed(1)}%)`,
+        badgeClass:
+          'bg-slate-800 text-slate-400 border-slate-700',
+        title: '관망 · 추격매수 금지',
+        desc:
+          `Buy Zone 상단보다 ${gap.toFixed(1)}% 높습니다.`,
+        posType: 'ABOVE',
+        gap
       };
     }
 
-    function formatKRW(val) {
-      return Number(val).toLocaleString('ko-KR') + '원';
-    }
+    function renderRangeBar(stock, diagnosis) {
+      const stop = Number(stock.stopLoss);
+      const buyLow = Number(stock.buyZoneLow);
+      const buyHigh = Number(stock.buyZoneHigh);
+      const target = Number(stock.valuation?.fairValue);
+      const currentPrice = Number(stock.currentPrice);
 
-    function switchMainTab(tab) {
-      currentMainTab = tab;
-      const btnAi = document.getElementById('tabBtnAi');
-      const btnWatch = document.getElementById('tabBtnWatch');
+      const minimum = Math.min(stop, currentPrice);
+      const maximum = Math.max(target, currentPrice, buyHigh);
+      const span = maximum - minimum || 1;
 
-      if (tab === 'AI_PICKS') {
-        btnAi.className = 'py-1.5 rounded-md text-center transition-all bg-blue-600 text-white shadow font-bold';
-        btnWatch.className = 'py-1.5 rounded-md text-center transition-all text-slate-400 hover:text-white';
-      } else {
-        btnWatch.className = 'py-1.5 rounded-md text-center transition-all bg-blue-600 text-white shadow font-bold';
-        btnAi.className = 'py-1.5 rounded-md text-center transition-all text-slate-400 hover:text-white';
-      }
-      renderList();
-    }
+      const percentage = (value) => {
+        return Math.max(
+          0,
+          Math.min(
+            100,
+            ((value - minimum) / span) * 100
+          )
+        );
+      };
 
-    function toggleProvenance(id) {
-      const item = userStocks.find(s => s.id === id);
-      if (item) {
-        item.expanded = !item.expanded;
-        saveStocks();
-        renderList();
-      }
-    }
+      const bandLeft = percentage(buyLow);
 
-    function toggleWatchlist(id) {
-      const item = userStocks.find(s => s.id === id);
-      if (item) {
-        item.inWatchlist = !item.inWatchlist;
-        saveStocks();
-        renderList();
-      }
-    }
+      const bandWidth = Math.max(
+        1,
+        percentage(buyHigh) - bandLeft
+      );
 
-    function renderRangeBar(stock, diag) {
-      let markerPos = '50%';
-      let markerColor = 'bg-blue-400';
-      let stateLabel = '';
+      const markerPosition = percentage(currentPrice);
 
-      if (diag.posType === 'INSIDE') {
-        const ratio = (stock.currentPrice - stock.buyZoneLow) / (stock.buyZoneHigh - stock.buyZoneLow);
-        markerPos = `${Math.min(95, Math.max(5, ratio * 100))}%`;
-        markerColor = 'bg-emerald-400 ring-2 ring-emerald-300';
-        stateLabel = '<span class="text-emerald-400 font-bold">밴드 내부 진입</span>';
-      } else if (diag.posType === 'ABOVE') {
-        markerPos = '96%';
-        markerColor = 'bg-amber-400';
-        stateLabel = `<span class="text-amber-400 font-bold">상단 초과 (+${diag.gap}%)</span>`;
-      } else {
-        markerPos = '4%';
+      let markerColor =
+        'bg-amber-400';
+
+      if (diagnosis.status === 'IN_ZONE') {
+        markerColor =
+          'bg-emerald-400 ring-2 ring-emerald-300';
+      } else if (diagnosis.status === 'STOP_LOSS') {
         markerColor = 'bg-rose-400';
-        stateLabel = '<span class="text-rose-400 font-bold">지지선 이탈</span>';
+      } else if (diagnosis.status === 'BELOW_ZONE') {
+        markerColor = 'bg-violet-400';
       }
 
       return `
         <div class="mt-2.5 pt-2 border-t border-slate-800">
+
           <div class="flex items-center justify-between text-[11px] mb-1">
-            <span class="text-slate-400">Buy Zone 밴드: <b class="text-slate-200">${formatKRW(stock.buyZoneLow)} ~ ${formatKRW(stock.buyZoneHigh)}</b></span>
-            <span>${stateLabel}</span>
+
+            <span class="text-slate-400">
+              Buy Zone
+              <b class="text-slate-200">
+                ${formatKRW(buyLow)} ~ ${formatKRW(buyHigh)}
+              </b>
+            </span>
+
+            <span class="font-bold ${
+              diagnosis.status === 'IN_ZONE'
+                ? 'text-emerald-400'
+                : 'text-slate-400'
+            }">
+              현재 ${formatKRW(currentPrice)}
+            </span>
           </div>
-          <div class="relative w-full h-2 bg-slate-900 rounded-full border border-slate-700/80 overflow-hidden my-1.5">
-            <div class="absolute inset-y-0 bg-emerald-500/30 border-x border-emerald-500/60" style="left: 25%; width: 50%;"></div>
-            <div class="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full ${markerColor} shadow" style="left: ${markerPos}; transform: translate(-50%, -50%);"></div>
+
+          <div class="relative w-full h-2 bg-slate-900 rounded-full border border-slate-700/80 my-1.5">
+
+            <div
+              class="absolute inset-y-0 bg-emerald-500/30 border-x border-emerald-500/60"
+              style="left:${bandLeft}%; width:${bandWidth}%">
+            </div>
+
+            <div
+              class="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full ${markerColor} shadow"
+              style="left:${markerPosition}%; transform:translate(-50%, -50%)">
+            </div>
           </div>
+
           <div class="flex justify-between text-[9px] text-slate-500">
-            <span>손절 ${formatKRW(stock.stopLoss)}</span>
-            <span class="text-slate-400">밴드 중심</span>
-            <span>목표 ${formatKRW(stock.provenance?.targetPrice || stock.buyZoneHigh * 1.2)}</span>
+            <span>축 하단 ${formatKRW(minimum)}</span>
+            <span>손절 ${formatKRW(stop)}</span>
+            <span>Base ${formatKRW(target)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderProvenance(stock) {
+      const valuation = stock.valuation || {};
+      const entryModel = stock.entryModel || {};
+      const riskReward = calculateRiskReward(stock);
+
+      const calculationPossible =
+        Number.isFinite(Number(valuation.baseMetricValue)) &&
+        Number.isFinite(Number(valuation.targetMultipleValue));
+
+      const calculatedFairValue =
+        calculationPossible
+          ? Number(valuation.baseMetricValue) *
+            Number(valuation.targetMultipleValue)
+          : null;
+
+      const calculationDifference =
+        calculatedFairValue && valuation.fairValue
+          ? (
+              (
+                Number(valuation.fairValue) -
+                calculatedFairValue
+              ) /
+              calculatedFairValue
+            ) * 100
+          : null;
+
+      return `
+        <div class="mt-1.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] space-y-2 text-slate-300">
+
+          <div class="flex items-center justify-between">
+            <b class="text-blue-300">
+              Valuation
+            </b>
+
+            <span class="${
+              stock.provenanceVerified
+                ? 'text-emerald-400'
+                : 'text-amber-400'
+            }">
+              ${
+                stock.provenanceVerified
+                  ? '원천 검증됨'
+                  : '⚠ 원천 미검증'
+              }
+            </span>
+          </div>
+
+          <div class="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1">
+
+            <span class="text-slate-400">
+              모델
+            </span>
+
+            <span class="text-right">
+              ${escapeHTML(valuation.model || '-')}
+            </span>
+
+            <span class="text-slate-400">
+              ${escapeHTML(
+                valuation.baseMetricLabel || '기초 지표'
+              )}
+            </span>
+
+            <span class="font-mono">
+              ${valuation.baseMetricValue ?? '-'}
+            </span>
+
+            <span class="text-slate-400">
+              ${escapeHTML(
+                valuation.targetMultipleLabel || '목표 배수'
+              )}
+            </span>
+
+            <span class="font-mono">
+              ${valuation.targetMultipleValue ?? '-'}
+            </span>
+
+            <span class="text-slate-400">
+              산식 결과
+            </span>
+
+            <span class="font-mono">
+              ${
+                calculatedFairValue
+                  ? formatKRW(
+                      Math.round(calculatedFairValue)
+                    )
+                  : '입력 미완료'
+              }
+            </span>
+
+            <span class="text-slate-400">
+              Base Fair Value
+            </span>
+
+            <span class="font-mono text-blue-300">
+              ${formatKRW(valuation.fairValue)}
+            </span>
+
+            ${
+              calculationDifference !== null &&
+              Math.abs(calculationDifference) > 0.5
+                ? `
+                  <span class="text-rose-300 col-span-2">
+                    ⚠ 산식 결과와 Base 적정가 차이
+                    ${calculationDifference.toFixed(1)}%
+                  </span>
+                `
+                : ''
+            }
+
+            <span class="text-slate-400">
+              Bear / Bull
+            </span>
+
+            <span class="font-mono">
+              ${formatKRW(valuation.bearValue)}
+              /
+              ${formatKRW(valuation.bullValue)}
+            </span>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800">
+            <b class="text-emerald-300">
+              Entry Model
+            </b>
+          </div>
+
+          <div class="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1">
+
+            <span class="text-slate-400">
+              기술적 지지
+            </span>
+
+            <span>
+              ${formatKRW(entryModel.technicalSupport)}
+            </span>
+
+            <span class="text-slate-400">
+              변동성 보정
+            </span>
+
+            <span>
+              ${entryModel.volatilityAdjustment ?? '-'}
+              ${
+                entryModel.volatilityAdjustment != null
+                  ? '%'
+                  : ''
+              }
+            </span>
+
+            <span class="text-slate-400">
+              최종 Buy Zone
+            </span>
+
+            <span class="text-emerald-300">
+              ${formatKRW(stock.buyZoneLow)}
+              ~
+              ${formatKRW(stock.buyZoneHigh)}
+            </span>
+
+            <span class="text-slate-400">
+              기준 진입가
+            </span>
+
+            <span>
+              ${
+                riskReward
+                  ? formatKRW(riskReward.entry)
+                  : '-'
+              }
+              (밴드 중앙)
+            </span>
+
+            <span class="text-slate-400">
+              자동 손익비
+            </span>
+
+            <span class="font-mono">
+              ${
+                riskReward
+                  ? `1 : ${riskReward.ratio.toFixed(2)}`
+                  : '계산 불가'
+              }
+            </span>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800 space-y-1 text-[10px] text-slate-400">
+
+            <div>
+              📐 <b>기술적 근거:</b>
+              ${escapeHTML(entryModel.techPoint || '-')}
+            </div>
+
+            <div>
+              💡 <b>핵심 논리:</b>
+              ${escapeHTML(stock.thesis || '-')}
+            </div>
+
+            <div>
+              ⚠️ <b>핵심 리스크:</b>
+              ${escapeHTML(stock.risk || '-')}
+            </div>
+
+            <div>
+              🔗 <b>출처:</b>
+              ${escapeHTML(stock.source || '-')}
+            </div>
+
+            <div>
+              🗓 <b>기준일:</b>
+              ${escapeHTML(stock.asOfDate || '-')}
+              · 재계산
+              ${formatDateTime(stock.lastCalculatedAt)}
+            </div>
           </div>
         </div>
       `;
     }
 
     function renderList() {
-      const container = document.getElementById('stockListContainer');
-      const emptyState = document.getElementById('emptyState');
+      const aiPicks = userStocks.filter((stock) => {
+        const diagnosis = diagnoseStock(stock);
 
-      const aiPicks = userStocks.filter(s => {
-        const diag = diagnoseStock(s);
-        return diag.status === 'IN_ZONE' || diag.status === 'APPROACHING';
+        return (
+          stock.isAiRecommended &&
+          [
+            'IN_ZONE',
+            'IMMINENT',
+            'APPROACHING'
+          ].includes(diagnosis.status)
+        );
       });
-      const watchlist = userStocks.filter(s => s.inWatchlist);
 
-      document.getElementById('countAiPicks').innerText = aiPicks.length;
-      document.getElementById('countWatchlist').innerText = watchlist.length;
+      const watchlist = userStocks.filter(
+        (stock) => stock.inWatchlist
+      );
 
-      const displayList = currentMainTab === 'AI_PICKS' ? aiPicks : watchlist;
+      document.getElementById(
+        'countAiPicks'
+      ).textContent = aiPicks.length;
 
-      if (displayList.length === 0) {
+      document.getElementById(
+        'countWatchlist'
+      ).textContent = watchlist.length;
+
+      const displayList =
+        currentMainTab === 'AI_PICKS'
+          ? aiPicks
+          : watchlist;
+
+      const container =
+        document.getElementById('stockListContainer');
+
+      const emptyState =
+        document.getElementById('emptyState');
+
+      if (!displayList.length) {
         container.innerHTML = '';
+
         emptyState.classList.remove('hidden');
         emptyState.classList.add('flex');
+
+        document.getElementById(
+          'emptyStateText'
+        ).textContent =
+          currentMainTab === 'AI_PICKS'
+            ? 'AI 선정 유니버스 중 현재 가격 조건을 충족한 종목이 없습니다.'
+            : '상단에서 관심 종목을 등록하세요.';
+
         return;
       }
+
       emptyState.classList.add('hidden');
       emptyState.classList.remove('flex');
 
-      container.innerHTML = displayList.map(stock => {
-        const diag = diagnoseStock(stock);
-        const isUp = (stock.dayChangeRate || 0) > 0;
-        const changeColor = isUp ? 'text-rose-400' : 'text-blue-400';
-        const changeSign = isUp ? '+' : '';
-        const target = stock.provenance?.targetPrice || Math.round(stock.buyZoneHigh * 1.25);
-        const upside = (((target - stock.currentPrice) / stock.currentPrice) * 100).toFixed(1);
+      container.innerHTML = displayList.map((stock) => {
+        const diagnosis = diagnoseStock(stock);
+        const isUp = Number(stock.dayChangeRate) > 0;
+        const target = Number(stock.valuation?.fairValue);
+
+        const upside =
+          target > 0
+            ? (
+                (
+                  target -
+                  Number(stock.currentPrice)
+                ) /
+                Number(stock.currentPrice)
+              ) * 100
+            : null;
+
+        const riskReward =
+          calculateRiskReward(stock);
+
+        const stockUrl =
+          ['KOSPI', 'KOSDAQ', 'ETF'].includes(
+            stock.market
+          )
+            ? `https://m.stock.naver.com/domestic/stock/${encodeURIComponent(stock.ticker)}/total`
+            : '#';
 
         return `
-          <div class="bg-finCard rounded-xl border border-finBorder p-3.5 shadow-lg relative transition hover:border-slate-600">
-            <!-- 종목 헤더: 이름 클릭 시 네이버 증권 공식 페이지로 직결 -->
-            <div class="flex items-start justify-between">
+          <article class="bg-finCard rounded-xl border border-finBorder p-3.5 shadow-lg">
+
+            <div class="flex items-start justify-between gap-2">
+
               <div>
                 <div class="flex items-center gap-1.5">
-                  <a href="https://m.stock.naver.com/domestic/stock/${stock.ticker}/total" 
-                     target="_blank" 
-                     rel="noopener noreferrer" 
-                     title="네이버 증권에서 실시간 호가/차트 확인"
-                     class="text-sm font-bold text-white tracking-tight hover:text-blue-400 hover:underline flex items-center gap-1 group">
-                    <span>${stock.name}</span>
-                    <svg class="w-3 h-3 text-slate-400 group-hover:text-blue-400 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                    </svg>
+
+                  <a
+                    href="${stockUrl}"
+                    ${
+                      stockUrl === '#'
+                        ? ''
+                        : 'target="_blank" rel="noopener noreferrer"'
+                    }
+                    class="text-sm font-bold text-white hover:text-blue-400">
+
+                    ${escapeHTML(stock.name)} ↗
                   </a>
-                  <span class="text-[10px] font-mono text-slate-400">${stock.ticker}</span>
-                  <span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">${stock.market}</span>
+
+                  <span class="text-[10px] font-mono text-slate-400">
+                    ${escapeHTML(stock.ticker)}
+                  </span>
+
+                  <span class="text-[9px] px-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                    ${escapeHTML(stock.market)}
+                  </span>
                 </div>
+
                 <div class="flex items-baseline gap-2 mt-0.5">
-                  <span id="price-${stock.ticker}" class="text-lg font-extrabold text-white font-mono">${formatKRW(stock.currentPrice)}</span>
-                  <span id="change-${stock.ticker}" class="text-[11px] font-semibold ${changeColor}">${changeSign}${(stock.dayChangeRate || 0).toFixed(2)}%</span>
+
+                  <span class="text-lg font-extrabold font-mono">
+                    ${formatKRW(stock.currentPrice)}
+                  </span>
+
+                  <span class="text-[11px] font-semibold ${
+                    isUp
+                      ? 'text-rose-400'
+                      : 'text-blue-400'
+                  }">
+                    ${isUp ? '+' : ''}
+                    ${Number(
+                      stock.dayChangeRate || 0
+                    ).toFixed(2)}%
+                  </span>
                 </div>
               </div>
 
               <div class="flex flex-col items-end gap-1">
-                <span class="px-2 py-0.5 rounded-full border text-[11px] font-semibold ${diag.badgeClass}">
-                  ${diag.badgeText}
+
+                <span class="px-2 py-0.5 rounded-full border text-[11px] font-semibold ${diagnosis.badgeClass}">
+                  ${diagnosis.badgeText}
                 </span>
-                <button onclick="toggleWatchlist('${stock.id}')" class="text-[10px] text-slate-400 hover:text-blue-400 transition flex items-center gap-0.5 mt-0.5">
-                  <span>${stock.inWatchlist ? '★ 장바구니 담김' : '+ 장바구니 추가'}</span>
+
+                <button
+                  onclick="toggleWatchlist('${stock.id}')"
+                  class="text-[10px] text-slate-400 hover:text-blue-400">
+
+                  ${
+                    stock.inWatchlist
+                      ? '★ 관심종목'
+                      : '＋ 관심종목'
+                  }
                 </button>
               </div>
             </div>
 
-            <!-- Position Range Bar -->
-            ${renderRangeBar(stock, diag)}
+            ${renderRangeBar(stock, diagnosis)}
 
-            <!-- Rule-based Action Box -->
-            <div class="mt-2.5 p-2 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center justify-between text-xs">
-              <div class="flex items-center gap-1.5">
-                <span class="text-blue-400 font-bold">진단:</span>
-                <span class="font-semibold ${diag.isInside ? 'text-emerald-400' : 'text-slate-300'}">${diag.title}</span>
+            <div class="mt-2.5 p-2 rounded-lg bg-slate-900/90 border border-slate-800 text-xs">
+
+              <div class="flex justify-between gap-2">
+
+                <span>
+                  <b class="text-blue-400">
+                    진단:
+                  </b>
+
+                  <b class="text-slate-200">
+                    ${diagnosis.title}
+                  </b>
+                </span>
+
+                <span class="text-[10px] text-slate-400 whitespace-nowrap">
+                  Base ${formatKRW(target)}
+
+                  ${
+                    upside !== null
+                      ? ` (${upside >= 0 ? '+' : ''}${upside.toFixed(1)}%)`
+                      : ''
+                  }
+                </span>
               </div>
-              <span class="text-[10px] text-slate-400">목표가 <b class="text-slate-200">${formatKRW(target)}</b> (+${upside}%)</span>
+
+              <p class="text-[10px] text-slate-500 mt-1">
+                ${diagnosis.desc}
+              </p>
             </div>
 
-            <!-- Provenance & Valuation Accordion (산출 근거) -->
             <div class="mt-2">
-              <button onclick="toggleProvenance('${stock.id}')" class="w-full flex items-center justify-between py-1 text-[11px] text-slate-400 hover:text-slate-200 transition">
-                <span class="flex items-center gap-1 font-medium">
-                  <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                  산출 근거 (Provenance) ${stock.expanded ? '접기 ▲' : '상세보기 ▼'}
+
+              <button
+                onclick="toggleProvenance('${stock.id}')"
+                class="w-full flex justify-between py-1 text-[11px] text-slate-400 hover:text-slate-200">
+
+                <span>
+                  📊 산출 근거
+                  ${stock.expanded ? '접기 ▲' : '상세보기 ▼'}
                 </span>
-                <span class="text-[10px] text-slate-500">손익비 ${stock.provenance?.riskReward || '1:3.0'}</span>
+
+                <span>
+                  손익비
+                  ${
+                    riskReward
+                      ? `1:${riskReward.ratio.toFixed(2)}`
+                      : '계산 불가'
+                  }
+                </span>
               </button>
 
-              ${stock.expanded && stock.provenance ? `
-                <div class="mt-1.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] space-y-1.5 text-slate-300">
-                  <div class="flex justify-between border-b border-slate-800/80 pb-1">
-                    <span class="text-slate-400">적용 밸류에이션 모델</span>
-                    <span class="text-blue-300 font-medium">${stock.provenance.model}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-slate-400">목표 밸류에이션 배수</span>
-                    <span class="font-mono text-slate-200">${stock.provenance.targetMultiple || '-'}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-slate-400">역사적 밴드 위치</span>
-                    <span class="text-amber-400">${stock.provenance.historicalBand || '하위 20% 이내 저평가'}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-slate-400">기술적 보정치</span>
-                    <span class="text-slate-300">${stock.provenance.techPoint || '-'}</span>
-                  </div>
-                  <div class="pt-1.5 border-t border-slate-800/80 text-[10px] text-slate-400 space-y-1">
-                    <div>💡 <b>핵심 근거:</b> ${stock.provenance.thesis || '-'}</div>
-                    <div>⚠️ <b>주요 리스크:</b> ${stock.provenance.risk || '-'}</div>
-                  </div>
-                </div>
-              ` : ''}
+              ${
+                stock.expanded
+                  ? renderProvenance(stock)
+                  : ''
+              }
             </div>
-          </div>
+          </article>
         `;
       }).join('');
     }
 
-    // Modal Search Logic
+    function switchMainTab(tab) {
+      currentMainTab = tab;
+
+      document.getElementById(
+        'tabBtnAi'
+      ).className = `
+        py-1.5 rounded-md
+        ${
+          tab === 'AI_PICKS'
+            ? 'bg-blue-600 text-white shadow font-bold'
+            : 'text-slate-400 hover:text-white'
+        }
+      `;
+
+      document.getElementById(
+        'tabBtnWatch'
+      ).className = `
+        py-1.5 rounded-md
+        ${
+          tab === 'WATCHLIST'
+            ? 'bg-blue-600 text-white shadow font-bold'
+            : 'text-slate-400 hover:text-white'
+        }
+      `;
+
+      renderList();
+    }
+
+    function toggleProvenance(id) {
+      const stock = userStocks.find(
+        (item) => item.id === id
+      );
+
+      if (!stock) {
+        return;
+      }
+
+      stock.expanded = !stock.expanded;
+      renderList();
+    }
+
+    function toggleWatchlist(id) {
+      const stock = userStocks.find(
+        (item) => item.id === id
+      );
+
+      if (!stock) {
+        return;
+      }
+
+      stock.inWatchlist = !stock.inWatchlist;
+
+      saveStocks();
+      renderList();
+    }
+
+    function showToast(message, tone = 'blue') {
+      const element =
+        document.createElement('div');
+
+      element.className = `
+        pointer-events-auto rounded-lg border
+        bg-slate-900 px-3 py-2 text-xs shadow-xl
+        ${
+          tone === 'red'
+            ? 'border-rose-500/50 text-rose-300'
+            : 'border-blue-500/50 text-blue-300'
+        }
+      `;
+
+      element.textContent = message;
+
+      document.getElementById(
+        'toastContainer'
+      ).appendChild(element);
+
+      setTimeout(() => {
+        element.remove();
+      }, 3200);
+    }
+
     function openAddModal() {
-      document.getElementById('addModal').classList.remove('hidden');
+      const modal =
+        document.getElementById('addModal');
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
       renderQuickPills();
-      document.getElementById('smartSearchInput').focus();
+
+      document.getElementById(
+        'inputAsOfDate'
+      ).value = new Date().toLocaleDateString(
+        'en-CA',
+        {
+          timeZone: 'Asia/Seoul'
+        }
+      );
+
+      setTimeout(() => {
+        document.getElementById(
+          'smartSearchInput'
+        ).focus();
+      }, 50);
     }
+
     function closeAddModal() {
-      document.getElementById('addModal').classList.add('hidden');
-      document.getElementById('addStockForm').reset();
-      document.getElementById('searchResultsDropdown').classList.add('hidden');
+      const modal =
+        document.getElementById('addModal');
+
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+
+      document.getElementById(
+        'addStockForm'
+      ).reset();
+
+      document.getElementById(
+        'searchResultsDropdown'
+      ).classList.add('hidden');
+
+      document.getElementById(
+        'formError'
+      ).classList.add('hidden');
     }
+
     function renderQuickPills() {
-      const container = document.getElementById('quickPills');
-      const presets = [
-        { label: '삼성전자', ticker: '005930' },
-        { label: 'SK하이닉스', ticker: '000660' },
-        { label: 'TIGER 미국S&P500', ticker: '360750' },
-        { label: '두산에너빌리티', ticker: '034020' },
-        { label: 'NAVER', ticker: '035420' }
-      ];
-      container.innerHTML = presets.map(p => `
-        <button type="button" onclick="selectPresetByTicker('${p.ticker}')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-blue-600 hover:text-white text-slate-300 text-[10px] border border-slate-700 transition">
-          + ${p.label}
-        </button>
-      `).join('');
+      document.getElementById(
+        'quickPills'
+      ).innerHTML = STOCK_DATABASE.map((stock) => {
+        return `
+          <button
+            type="button"
+            onclick="selectPresetByTicker('${stock.ticker}')"
+            class="px-2 py-0.5 rounded bg-slate-800 hover:bg-blue-600 text-slate-300 text-[10px] border border-slate-700">
+
+            ＋ ${escapeHTML(stock.name)}
+          </button>
+        `;
+      }).join('');
     }
-    function handleSmartSearch(query) {
-      const dropdown = document.getElementById('searchResultsDropdown');
-      const q = query.trim().toLowerCase();
-      if (!q) {
+
+    function handleSmartSearch(searchValue) {
+      const dropdown =
+        document.getElementById(
+          'searchResultsDropdown'
+        );
+
+      const query =
+        searchValue.trim().toLowerCase();
+
+      if (!query) {
         dropdown.classList.add('hidden');
         return;
       }
-      const matches = STOCK_DATABASE.filter(s => s.name.toLowerCase().includes(q) || s.ticker.includes(q));
-      if (matches.length === 0) {
-        dropdown.innerHTML = `<div class="p-2 text-slate-500 text-center text-[11px]">일치하는 프리셋이 없습니다. 아래 폼에 직접 입력하세요.</div>`;
+
+      const matches =
+        STOCK_DATABASE.filter((stock) => {
+          return (
+            stock.name.toLowerCase().includes(query) ||
+            stock.ticker.includes(query)
+          );
+        });
+
+      if (!matches.length) {
+        dropdown.innerHTML = `
+          <div class="p-2 text-slate-500 text-center text-[11px]">
+            프리셋 없음 — 아래에 직접 입력하세요.
+          </div>
+        `;
+
         dropdown.classList.remove('hidden');
         return;
       }
-      dropdown.innerHTML = matches.map(s => `
-        <div onclick="selectPresetByTicker('${s.ticker}'); document.getElementById('searchResultsDropdown').classList.add('hidden');" class="p-2 hover:bg-slate-800 cursor-pointer flex justify-between items-center text-xs">
-          <div><b class="text-white">${s.name}</b> <span class="text-slate-400 font-mono text-[10px]">(${s.ticker})</span></div>
-          <span class="text-emerald-400 font-mono">${formatKRW(s.currentPrice)}</span>
-        </div>
-      `).join('');
+
+      dropdown.innerHTML = matches.map((stock) => {
+        return `
+          <button
+            type="button"
+            onclick="selectPresetByTicker('${stock.ticker}')"
+            class="w-full p-2 hover:bg-slate-800 flex justify-between">
+
+            <b>
+              ${escapeHTML(stock.name)}
+            </b>
+
+            <span class="font-mono text-emerald-400">
+              ${formatKRW(stock.currentPrice)}
+            </span>
+          </button>
+        `;
+      }).join('');
+
       dropdown.classList.remove('hidden');
     }
+
     function selectPresetByTicker(ticker) {
-      const s = STOCK_DATABASE.find(item => item.ticker === ticker);
-      if (s) {
-        document.getElementById('inputName').value = s.name;
-        document.getElementById('inputTicker').value = s.ticker;
-        document.getElementById('inputCurrentPrice').value = s.currentPrice;
-        document.getElementById('inputBuyLow').value = s.buyZoneLow;
-        document.getElementById('inputBuyHigh').value = s.buyZoneHigh;
-        document.getElementById('inputStopLoss').value = s.stopLoss;
-        document.getElementById('inputTargetPrice').value = s.provenance?.targetPrice || Math.round(s.buyZoneHigh * 1.25);
-        document.getElementById('inputModel').value = s.provenance?.model || '12M Forward 밸류에이션 모델';
+      const stock =
+        STOCK_DATABASE.find(
+          (item) => item.ticker === ticker
+        );
+
+      if (!stock) {
+        return;
       }
+
+      const values = {
+        inputName: stock.name,
+        inputMarket: stock.market,
+        inputTicker: stock.ticker,
+        inputCurrentPrice: stock.currentPrice,
+        inputBuyLow: stock.buyZoneLow,
+        inputBuyHigh: stock.buyZoneHigh,
+        inputStopLoss: stock.stopLoss,
+        inputFairValue: stock.valuation.fairValue,
+        inputBaseMetric:
+          stock.valuation.baseMetricValue,
+        inputTargetMultiple:
+          stock.valuation.targetMultipleValue,
+        inputModel:
+          stock.valuation.model,
+        inputTechPoint:
+          stock.entryModel.techPoint,
+        inputSource:
+          stock.source,
+        inputAsOfDate:
+          stock.asOfDate
+      };
+
+      Object.entries(values).forEach(
+        ([elementId, value]) => {
+          document.getElementById(
+            elementId
+          ).value = value ?? '';
+        }
+      );
+
+      document.getElementById(
+        'inputAiRecommended'
+      ).checked = stock.isAiRecommended;
+
+      document.getElementById(
+        'searchResultsDropdown'
+      ).classList.add('hidden');
     }
-    function autoCalculateBuyZone() {
-      const p = Number(document.getElementById('inputCurrentPrice').value);
-      if (!p) return;
-      document.getElementById('inputBuyHigh').value = Math.round((p * 0.97) / 100) * 100;
-      document.getElementById('inputBuyLow').value = Math.round((p * 0.93) / 100) * 100;
-      document.getElementById('inputStopLoss').value = Math.round((p * 0.89) / 100) * 100;
-      document.getElementById('inputTargetPrice').value = Math.round((p * 1.20) / 100) * 100;
+
+    function validateForm(stock) {
+      const requiredNumbers = [
+        'currentPrice',
+        'buyZoneLow',
+        'buyZoneHigh',
+        'stopLoss',
+        'fairValue'
+      ];
+
+      const hasInvalidNumber =
+        requiredNumbers.some((key) => {
+          return (
+            !Number.isFinite(stock[key]) ||
+            stock[key] <= 0
+          );
+        });
+
+      if (hasInvalidNumber) {
+        return '가격 값은 모두 0보다 큰 숫자여야 합니다.';
+      }
+
+      const validPriceOrder =
+        stock.stopLoss < stock.buyZoneLow &&
+        stock.buyZoneLow <= stock.buyZoneHigh &&
+        stock.buyZoneHigh < stock.fairValue;
+
+      if (!validPriceOrder) {
+        return '필수 순서: 손절선 < Buy Zone 하단 ≤ 상단 < Base 적정가';
+      }
+
+      if (
+        stock.baseMetricValue !== null &&
+        stock.targetMultipleValue !== null
+      ) {
+        const calculatedFairValue =
+          stock.baseMetricValue *
+          stock.targetMultipleValue;
+
+        const difference =
+          Math.abs(
+            stock.fairValue -
+            calculatedFairValue
+          ) / calculatedFairValue;
+
+        if (difference > 0.05) {
+          return (
+            '기초 지표 × 목표 배수' +
+            `(${formatKRW(Math.round(calculatedFairValue))})와 ` +
+            'Base 적정가 차이가 5%를 넘습니다.'
+          );
+        }
+      }
+
+      return null;
     }
-    function handleAddStock(e) {
-      e.preventDefault();
-      const ticker = document.getElementById('inputTicker').value.trim();
-      const newStock = {
-        id: 'stock-' + ticker + '-' + Date.now(),
-        name: document.getElementById('inputName').value.trim(),
+
+    function handleAddStock(event) {
+      event.preventDefault();
+
+      const getElement = (id) => {
+        return document.getElementById(id);
+      };
+
+      const ticker =
+        getElement('inputTicker')
+          .value
+          .trim()
+          .toUpperCase();
+
+      const stock = {
+        id: `stock-${ticker}-${Date.now()}`,
+        name:
+          getElement('inputName')
+            .value
+            .trim(),
         ticker,
-        market: 'KRX',
-        currentPrice: Number(document.getElementById('inputCurrentPrice').value),
-        dayChangeRate: 0.0,
-        buyZoneLow: Number(document.getElementById('inputBuyLow').value),
-        buyZoneHigh: Number(document.getElementById('inputBuyHigh').value),
-        stopLoss: Number(document.getElementById('inputStopLoss').value),
+        market:
+          getElement('inputMarket').value,
+        currentPrice:
+          Number(
+            getElement('inputCurrentPrice').value
+          ),
+        dayChangeRate: 0,
+        buyZoneLow:
+          Number(
+            getElement('inputBuyLow').value
+          ),
+        buyZoneHigh:
+          Number(
+            getElement('inputBuyHigh').value
+          ),
+        stopLoss:
+          Number(
+            getElement('inputStopLoss').value
+          ),
+        isAiRecommended:
+          getElement(
+            'inputAiRecommended'
+          ).checked,
         inWatchlist: true,
         expanded: false,
-        provenance: {
-          model: document.getElementById('inputModel').value.trim() || '사용자 지정 밸류에이션 모델',
-          targetPrice: Number(document.getElementById('inputTargetPrice').value),
-          targetMultiple: 'PER 하단 밴드',
-          historicalBand: '사용자 지정 밴드',
-          riskReward: '1 : 3.0',
-          techPoint: '지지선 확인',
-          thesis: '사용자 관심 종목 매수 판별 등록',
-          risk: '시장 변동성 주의'
-        }
+
+        valuation: {
+          model:
+            getElement('inputModel')
+              .value
+              .trim(),
+          baseMetricLabel: '기초 지표',
+          baseMetricValue:
+            numberOrNull(
+              getElement('inputBaseMetric').value
+            ),
+          targetMultipleLabel: '목표 배수',
+          targetMultipleValue:
+            numberOrNull(
+              getElement(
+                'inputTargetMultiple'
+              ).value
+            ),
+          fairValue:
+            Number(
+              getElement('inputFairValue').value
+            ),
+          bearValue: null,
+          bullValue: null
+        },
+
+        entryModel: {
+          technicalSupport: null,
+          volatilityAdjustment: null,
+          techPoint:
+            getElement('inputTechPoint')
+              .value
+              .trim()
+        },
+
+        thesis:
+          '사용자 등록 종목 — 투자 논리 추가 필요',
+        risk:
+          '시장·기업 고유 리스크 확인 필요',
+        source:
+          getElement('inputSource')
+            .value
+            .trim(),
+        asOfDate:
+          getElement('inputAsOfDate').value,
+        lastCalculatedAt:
+          new Date().toISOString(),
+        provenanceVerified: false
       };
-      userStocks.unshift(newStock);
+
+      const validationError =
+        validateForm({
+          ...stock,
+          ...stock.valuation
+        });
+
+      if (validationError) {
+        const errorBox =
+          getElement('formError');
+
+        errorBox.textContent =
+          validationError;
+
+        errorBox.classList.remove('hidden');
+        return;
+      }
+
+      const existingIndex =
+        userStocks.findIndex(
+          (item) => item.ticker === ticker
+        );
+
+      if (existingIndex >= 0) {
+        stock.id =
+          userStocks[existingIndex].id;
+
+        userStocks[existingIndex] =
+          stock;
+      } else {
+        userStocks.unshift(stock);
+      }
+
       saveStocks();
       closeAddModal();
-      currentMainTab = 'WATCHLIST';
       switchMainTab('WATCHLIST');
+
+      showToast(
+        existingIndex >= 0
+          ? '기존 종목을 새 모델로 교체했습니다.'
+          : '종목을 추가했습니다.'
+      );
     }
 
-    // Realtime Backend Sync
+    function isKrxOpen() {
+      const parts =
+        new Intl.DateTimeFormat(
+          'en-US',
+          {
+            timeZone: 'Asia/Seoul',
+            weekday: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+            hourCycle: 'h23'
+          }
+        ).formatToParts(new Date());
+
+      const getPart = (type) => {
+        return parts.find(
+          (part) => part.type === type
+        )?.value;
+      };
+
+      const weekday = getPart('weekday');
+
+      const minutes =
+        Number(getPart('hour')) * 60 +
+        Number(getPart('minute'));
+
+      return (
+        !['Sat', 'Sun'].includes(weekday) &&
+        minutes >= 540 &&
+        minutes <= 930
+      );
+    }
+
+    function setConnectionState(
+      state,
+      detail = ''
+    ) {
+      const configurations = {
+        LIVE: [
+          'bg-emerald-500',
+          'text-emerald-400',
+          '실시간 연결'
+        ],
+
+        DELAYED: [
+          'bg-amber-500',
+          'text-amber-400',
+          '지연/일부 데이터'
+        ],
+
+        DISCONNECTED: [
+          'bg-rose-500',
+          'text-rose-400',
+          '연결 끊김'
+        ],
+
+        MARKET_CLOSED: [
+          'bg-slate-500',
+          'text-slate-400',
+          '장 마감'
+        ]
+      };
+
+      const configuration =
+        configurations[state];
+
+      document.getElementById(
+        'liveDot'
+      ).className =
+        `relative inline-flex rounded-full h-2 w-2 ${configuration[0]}`;
+
+      document.getElementById(
+        'liveStatusText'
+      ).className =
+        `font-medium ${configuration[1]}`;
+
+      document.getElementById(
+        'liveStatusText'
+      ).textContent =
+        configuration[2] +
+        (detail ? ` · ${detail}` : '');
+
+      document.getElementById(
+        'livePing'
+      ).classList.toggle(
+        'hidden',
+        state !== 'LIVE'
+      );
+    }
+
     async function fetchRealtimePrices() {
-      if (userStocks.length === 0) return;
-      const tickers = userStocks.map(s => s.ticker).filter(Boolean);
+      if (!userStocks.length) {
+        return;
+      }
+
+      const tickers = [
+        ...new Set(
+          userStocks
+            .map((stock) => stock.ticker)
+            .filter(Boolean)
+        )
+      ];
+
+      const controller =
+        new AbortController();
+
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, API_TIMEOUT_MS);
 
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
-        const res = await fetch(`/api/prices?tickers=${tickers.join(',')}`, { signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.prices) {
-            document.getElementById('liveStatusText').textContent = '증권사 실시간 시세 연동 (Live)';
-            tickers.forEach(t => {
-              const info = data.prices[t];
-              if (info && info.success && info.price > 0) {
-                const s = userStocks.find(item => item.ticker === t);
-                if (s) {
-                  s.currentPrice = info.price;
-                  s.dayChangeRate = info.rate;
-
-                  const priceEl = document.getElementById(`price-${t}`);
-                  if (priceEl) priceEl.textContent = formatKRW(info.price);
-
-                  const changeEl = document.getElementById(`change-${t}`);
-                  if (changeEl) {
-                    const isUp = info.rate > 0;
-                    changeEl.className = `text-[11px] font-semibold ${isUp ? 'text-rose-400' : 'text-blue-400'}`;
-                    changeEl.textContent = `${isUp ? '+' : ''}${info.rate.toFixed(2)}%`;
-                  }
-                }
-              }
-            });
-            saveStocks();
+        const response = await fetch(
+          `/api/prices?tickers=${encodeURIComponent(tickers.join(','))}`,
+          {
+            signal: controller.signal,
+            cache: 'no-store'
           }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `HTTP ${response.status}`
+          );
         }
-      } catch (err) {}
-      const now = new Date();
-      document.getElementById('lastUpdatedTime').textContent = `${now.toTimeString().split(' ')[0]} 갱신`;
+
+        const data =
+          await response.json();
+
+        if (
+          !data.success ||
+          !data.prices
+        ) {
+          throw new Error(
+            'invalid response'
+          );
+        }
+
+        let updatedCount = 0;
+
+        tickers.forEach((ticker) => {
+          const priceInformation =
+            data.prices[ticker];
+
+          if (
+            priceInformation &&
+            priceInformation.success &&
+            Number(priceInformation.price) > 0
+          ) {
+            userStocks
+              .filter(
+                (stock) =>
+                  stock.ticker === ticker
+              )
+              .forEach((stock) => {
+                stock.currentPrice =
+                  Number(
+                    priceInformation.price
+                  );
+
+                stock.dayChangeRate =
+                  Number(
+                    priceInformation.rate
+                  ) || 0;
+
+                stock.priceAsOf =
+                  priceInformation.asOf ||
+                  priceInformation.timestamp ||
+                  new Date().toISOString();
+              });
+
+            updatedCount += 1;
+          }
+        });
+
+        if (!updatedCount) {
+          throw new Error(
+            'no valid prices'
+          );
+        }
+
+        lastSuccessfulSync =
+          Date.now();
+
+        saveStocks();
+
+        /*
+         * 현재가만 직접 바꾸지 않고
+         * 카드 전체를 다시 렌더링합니다.
+         *
+         * 진단, 손익비, 상승여력,
+         * Range Bar가 모두 재계산됩니다.
+         */
+        renderList();
+
+        const isDelayed =
+          updatedCount < tickers.length ||
+          data.delayed === true;
+
+        if (isKrxOpen()) {
+          setConnectionState(
+            isDelayed
+              ? 'DELAYED'
+              : 'LIVE',
+            `${updatedCount}/${tickers.length} 종목`
+          );
+        } else {
+          setConnectionState(
+            'MARKET_CLOSED',
+            `${updatedCount}/${tickers.length} 종목`
+          );
+        }
+
+        document.getElementById(
+          'lastUpdatedTime'
+        ).textContent =
+          new Date(
+            lastSuccessfulSync
+          ).toLocaleTimeString(
+            'ko-KR',
+            {
+              timeZone: 'Asia/Seoul',
+              hour12: false
+            }
+          ) + ' KST';
+
+      } catch (error) {
+        const recentlyConnected =
+          lastSuccessfulSync &&
+          Date.now() -
+            lastSuccessfulSync <=
+            STALE_AFTER_MS;
+
+        setConnectionState(
+          recentlyConnected
+            ? 'DELAYED'
+            : 'DISCONNECTED',
+          error.name === 'AbortError'
+            ? '응답 시간 초과'
+            : 'API 확인 필요'
+        );
+
+        if (!lastSuccessfulSync) {
+          document.getElementById(
+            'lastUpdatedTime'
+          ).textContent =
+            '마지막 성공 없음';
+        }
+      } finally {
+        clearTimeout(timeout);
+      }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      renderList();
-      fetchRealtimePrices();
-      setInterval(fetchRealtimePrices, 5000);
-    });
+    window.addEventListener(
+      'DOMContentLoaded',
+      () => {
+        renderList();
+        fetchRealtimePrices();
+
+        setInterval(
+          fetchRealtimePrices,
+          REFRESH_MS
+        );
+      }
+    );
   </script>
 </body>
 </html>
