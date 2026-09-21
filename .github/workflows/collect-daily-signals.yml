@@ -1,0 +1,27 @@
+name: Collect daily swing signals
+
+on:
+  schedule:
+    # 16:30 KST on weekdays. The collector itself skips holidays/no new daily bar.
+    - cron: '30 7 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Sheets client
+        run: pip install --disable-pip-version-check google-api-python-client google-auth
+      - name: Collect live signals and outcomes
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: python scripts/collect_daily_signals.py
