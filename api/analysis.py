@@ -13,7 +13,9 @@ PRICE_HISTORY_URL = (
 TICKER_PATTERN = re.compile(r"^[0-9]{6}$")
 MIN_BARS = 60
 HISTORY_BARS = 140
-MAX_HISTORY_BARS = 850
+# Vercel 함수 시간 제한 안에서 안정적으로 처리할 수 있는 최대 일봉 수입니다.
+# 3년 백테스트는 pageStart를 옮겨 여러 청크로 수집한 뒤 합칩니다.
+MAX_HISTORY_BARS = 300
 MAX_PAGE_SIZE = 60
 
 COMMON_HEADERS = {
@@ -114,7 +116,7 @@ def normalize_history(payload):
     return bars
 
 
-def fetch_history(ticker, history_bars=HISTORY_BARS):
+def fetch_history(ticker, history_bars=HISTORY_BARS, page_start=1):
     headers = {
         **COMMON_HEADERS,
         "Referer": f"https://m.stock.naver.com/domestic/stock/{ticker}/total",
@@ -122,7 +124,7 @@ def fetch_history(ticker, history_bars=HISTORY_BARS):
     bars_by_date = {}
     history_bars = max(MIN_BARS, min(int(history_bars), MAX_HISTORY_BARS))
     remaining = history_bars
-    page = 1
+    page = max(1, int(page_start))
 
     while remaining > 0:
         page_size = min(remaining, MAX_PAGE_SIZE)
@@ -436,12 +438,19 @@ class handler(BaseHTTPRequestHandler):
                 return
             mode = query.get("mode", ["analysis"])[0].strip().lower()
             history_bars = query.get("historyBars", [HISTORY_BARS])[0]
-            bars = fetch_history(ticker, history_bars)
+            page_start = query.get("pageStart", [1])[0]
+            bars = fetch_history(ticker, history_bars, page_start)
             result = (
                 backtest_v1(ticker, bars, query.get("horizon", [10])[0])
                 if mode == "backtest" else
                 analyze_bars(ticker, bars)
             )
+            if mode == "backtest" and result.get("success"):
+                result["pageStart"] = int(page_start)
+                result["barRange"] = {
+                    "from": bars[0].get("date") if bars else None,
+                    "to": bars[-1].get("date") if bars else None,
+                }
             self.send_json(200 if result.get("success") else 422, result)
         except urllib.error.HTTPError as error:
             self.send_json(502, {
