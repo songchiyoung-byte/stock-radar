@@ -16,10 +16,6 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-
-
 UNIVERSE = [
     ("005930", "삼성전자"), ("000660", "SK하이닉스"),
     ("207940", "삼성바이오로직스"), ("373220", "LG에너지솔루션"),
@@ -77,10 +73,14 @@ def scanner_passed(analysis):
 
 
 def signal_id(ticker, signal_date):
-    return f"SIG-v{RULE_VERSION}-{ticker}-{signal_date.replace('-', '')}"
+    return f"SIG-{RULE_VERSION}-{ticker}-{signal_date.replace('-', '')}"
 
 
 def sheet_service():
+    # Keep scanner helpers importable for local tests without the Sheets client.
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+
     raw = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "")
     if not raw or not os.environ.get("GOOGLE_SHEET_ID"):
         raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON and GOOGLE_SHEET_ID are required")
