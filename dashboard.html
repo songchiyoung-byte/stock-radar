@@ -129,7 +129,7 @@
           onclick="switchMainTab('AI_PICKS')"
           id="tabBtnAi"
           class="py-1.5 rounded-md bg-blue-600 text-white shadow font-bold">
-          오늘의 후보 (<span id="countAiPicks">0</span>)
+          구간 접근 후보 (<span id="countAiPicks">0</span>)
         </button>
 
         <button
@@ -393,6 +393,24 @@
             class="w-full input-style">
         </div>
 
+        <div>
+          <label class="block text-slate-400 mb-1">
+            운용 방식
+          </label>
+
+          <select
+            id="inputTradeStyle"
+            class="w-full input-style">
+
+            <option value="SWING">스윙 · 1~4주</option>
+            <option value="SHORT">단기 관찰 · 당일~3일</option>
+          </select>
+
+          <p class="mt-1 text-[10px] text-slate-500">
+            구간 판단의 시간축을 기록합니다. 자동 주문은 하지 않습니다.
+          </p>
+        </div>
+
         <div class="grid grid-cols-2 gap-2">
 
           <div>
@@ -581,6 +599,7 @@
         inWatchlist:
           stock.inWatchlist ??
           ['005930', '000660', '360750'].includes(stock.ticker),
+        tradeStyle: stock.tradeStyle || 'SWING',
         expanded: false
       };
     }
@@ -1301,7 +1320,7 @@
           'emptyStateText'
         ).textContent =
           currentMainTab === 'AI_PICKS'
-            ? '추천 후보군 중 현재 가격 조건을 충족한 종목이 없습니다.'
+            ? '기술 조건과 현재 가격이 함께 맞는 후보가 없습니다.'
             : '상단에서 관심 종목을 등록하세요.';
 
         return;
@@ -1339,6 +1358,19 @@
         const riskReward =
           calculateRiskReward(stock);
 
+        const tradeStyle =
+          stock.tradeStyle === 'SHORT'
+            ? {
+                label: '단기 관찰',
+                className:
+                  'bg-amber-500/10 text-amber-300 border-amber-500/30'
+              }
+            : {
+                label: '스윙',
+                className:
+                  'bg-violet-500/10 text-violet-300 border-violet-500/30'
+              };
+
         const stockUrl =
           ['KOSPI', 'KOSDAQ', 'ETF'].includes(
             stock.market
@@ -1372,6 +1404,10 @@
 
                   <span class="text-[9px] px-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
                     ${escapeHTML(stock.market)}
+                  </span>
+
+                  <span class="text-[9px] px-1 rounded border ${tradeStyle.className}">
+                    ${tradeStyle.label}
                   </span>
                 </div>
 
@@ -1443,6 +1479,28 @@
               <p class="text-[10px] text-slate-500 mt-1">
                 ${diagnosis.desc}
               </p>
+
+              ${stock.analysis?.firstTargetPrice
+                ? `
+                  <div class="mt-2 grid grid-cols-3 gap-1 rounded-md border border-slate-800 bg-slate-950/60 p-1.5 text-[10px]">
+                    <div>
+                      <span class="block text-slate-500">기준 진입</span>
+                      <b class="text-slate-200">${formatKRW(stock.analysis.entryPrice)}</b>
+                    </div>
+                    <div>
+                      <span class="block text-slate-500">1차 익절</span>
+                      <b class="text-emerald-300">${formatKRW(stock.analysis.firstTargetPrice)}</b>
+                    </div>
+                    <div>
+                      <span class="block text-slate-500">손절</span>
+                      <b class="text-rose-300">${formatKRW(stock.stopLoss)}</b>
+                    </div>
+                  </div>
+                  <p class="mt-1 text-[9px] text-slate-500">
+                    1차 익절은 기준 진입가 대비 손익비 1:2 기준입니다.
+                  </p>
+                `
+                : ''}
 
               ${/^[0-9]{6}$/.test(stock.ticker)
                 ? `
@@ -1791,7 +1849,9 @@
         inputSource:
           stock.source,
         inputAsOfDate:
-          stock.asOfDate
+          stock.asOfDate,
+        inputTradeStyle:
+          stock.tradeStyle || 'SWING'
       };
 
       Object.entries(values).forEach(
@@ -2037,6 +2097,8 @@
             getElement('inputCurrentPrice').value
           ),
         dayChangeRate: selectedPriceRate,
+        tradeStyle:
+          getElement('inputTradeStyle').value,
         buyZoneLow:
           numberOrNull(
             getElement('inputBuyLow').value

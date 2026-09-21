@@ -195,6 +195,8 @@ def analyze_bars(ticker, bars):
     risk = entry - stop_loss
     reward = target - entry
     risk_reward = reward / risk if risk > 0 else 0
+    first_target = round_price(entry + risk * 2) if risk > 0 else None
+    risk_percent = (risk / entry) * 100 if entry > 0 else None
 
     strategy_scores = {
         "PULLBACK": 0,
@@ -283,6 +285,9 @@ def analyze_bars(ticker, bars):
         "buyZoneLow": buy_low if structure_valid else None,
         "buyZoneHigh": buy_high if structure_valid else None,
         "stopLoss": stop_loss if structure_valid else None,
+        "entryPrice": round_price(entry) if structure_valid else None,
+        "firstTargetPrice": first_target if structure_valid else None,
+        "riskPercent": round(risk_percent, 2) if structure_valid else None,
         "targetPrice": target if structure_valid else None,
         "riskReward": round(risk_reward, 2),
         "inBuyZone": bool(structure_valid and in_zone),
