@@ -23,5 +23,5 @@ jobs:
       - name: Collect live signals and outcomes
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SHEET_ID: 1si3LRJynDWj9jOHA3TvqUs1z4EnieEU4e0xgYQwKiDw
         run: python scripts/collect_daily_signals.py
