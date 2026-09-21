@@ -21,7 +21,6 @@ jobs:
       - name: Install Sheets client
         run: pip install --disable-pip-version-check google-api-python-client google-auth
       - name: Collect live signals and outcomes
-        if: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON != '' }}
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_SHEET_ID: 1si3LRJynDWj9jOHA3TvqUs1z4EnieEU4e0xgYQwKiDw
