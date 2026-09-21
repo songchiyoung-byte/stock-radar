@@ -1,0 +1,1201 @@
+{
+  "generatedAt": "2026-09-21T08:28:49.552858+00:00",
+  "ruleVersion": "v1.0",
+  "strategy": "SWING",
+  "horizonTradingDays": 10,
+  "universe": [
+    {
+      "ticker": "005930",
+      "company": "삼성전자"
+    },
+    {
+      "ticker": "000660",
+      "company": "SK하이닉스"
+    },
+    {
+      "ticker": "207940",
+      "company": "삼성바이오로직스"
+    },
+    {
+      "ticker": "373220",
+      "company": "LG에너지솔루션"
+    },
+    {
+      "ticker": "005380",
+      "company": "현대차"
+    },
+    {
+      "ticker": "000270",
+      "company": "기아"
+    },
+    {
+      "ticker": "012330",
+      "company": "현대모비스"
+    },
+    {
+      "ticker": "009150",
+      "company": "삼성전기"
+    },
+    {
+      "ticker": "006400",
+      "company": "삼성SDI"
+    },
+    {
+      "ticker": "028260",
+      "company": "삼성물산"
+    },
+    {
+      "ticker": "018260",
+      "company": "삼성에스디에스"
+    },
+    {
+      "ticker": "051910",
+      "company": "LG화학"
+    },
+    {
+      "ticker": "066570",
+      "company": "LG전자"
+    },
+    {
+      "ticker": "003550",
+      "company": "LG"
+    },
+    {
+      "ticker": "003670",
+      "company": "POSCO홀딩스"
+    },
+    {
+      "ticker": "010130",
+      "company": "고려아연"
+    },
+    {
+      "ticker": "035420",
+      "company": "NAVER"
+    },
+    {
+      "ticker": "035720",
+      "company": "카카오"
+    },
+    {
+      "ticker": "034730",
+      "company": "SK"
+    },
+    {
+      "ticker": "105560",
+      "company": "KB금융"
+    },
+    {
+      "ticker": "055550",
+      "company": "신한지주"
+    },
+    {
+      "ticker": "086790",
+      "company": "하나금융지주"
+    },
+    {
+      "ticker": "316140",
+      "company": "우리금융지주"
+    },
+    {
+      "ticker": "032830",
+      "company": "삼성생명"
+    },
+    {
+      "ticker": "329180",
+      "company": "HD현대중공업"
+    },
+    {
+      "ticker": "009540",
+      "company": "HD한국조선해양"
+    },
+    {
+      "ticker": "047810",
+      "company": "한국항공우주"
+    },
+    {
+      "ticker": "259960",
+      "company": "크래프톤"
+    },
+    {
+      "ticker": "068270",
+      "company": "셀트리온"
+    },
+    {
+      "ticker": "096770",
+      "company": "SK이노베이션"
+    }
+  ],
+  "summary": {
+    "universeCount": 30,
+    "completedTickerCount": 30,
+    "errorCount": 0,
+    "signalCount": 19,
+    "targetHitCount": 6,
+    "stopHitCount": 6,
+    "targetHitRate": 50.0,
+    "averageR": 0.45
+  },
+  "errors": [],
+  "results": [
+    {
+      "success": true,
+      "ticker": "005930",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "삼성전자",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "000660",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 1,
+      "targetHitCount": 1,
+      "stopHitCount": 0,
+      "targetHitRate": 100.0,
+      "averageR": 2.0,
+      "signals": [
+        {
+          "signalDate": "2024-05-31",
+          "ticker": "000660",
+          "currentPrice": 189000,
+          "technicalScore": 70,
+          "strategy": "PULLBACK",
+          "ma20": 189000,
+          "rsi14": 60.36,
+          "volumeRatio20": 1.8,
+          "entryPrice": 189000,
+          "stopLoss": 180000,
+          "firstTargetPrice": 207000,
+          "riskReward": 2.33,
+          "day3ReturnPct": 2.49,
+          "day5ReturnPct": 10.05,
+          "day10ReturnPct": 17.99,
+          "firstEvent": "TARGET_HIT",
+          "firstEventDate": "2024-06-07",
+          "rMultiple": 2.0,
+          "company": "SK하이닉스",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "SK하이닉스",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "207940",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 814,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "삼성바이오로직스",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 883
+      }
+    },
+    {
+      "success": true,
+      "ticker": "373220",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "LG에너지솔루션",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "005380",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 2,
+      "targetHitCount": 2,
+      "stopHitCount": 0,
+      "targetHitRate": 100.0,
+      "averageR": 2.0,
+      "signals": [
+        {
+          "signalDate": "2024-01-25",
+          "ticker": "005380",
+          "currentPrice": 188500,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 188000,
+          "rsi14": 52.85,
+          "volumeRatio20": 1.96,
+          "entryPrice": 188000,
+          "stopLoss": 183000,
+          "firstTargetPrice": 198000,
+          "riskReward": 3.1,
+          "day3ReturnPct": 1.06,
+          "day5ReturnPct": 10.64,
+          "day10ReturnPct": 32.98,
+          "firstEvent": "TARGET_HIT",
+          "firstEventDate": "2024-02-01",
+          "rMultiple": 2.0,
+          "company": "현대차",
+          "ruleVersion": "v1.0"
+        },
+        {
+          "signalDate": "2026-05-19",
+          "ticker": "005380",
+          "currentPrice": 604000,
+          "technicalScore": 70,
+          "strategy": "PULLBACK",
+          "ma20": 589000,
+          "rsi14": 61.56,
+          "volumeRatio20": 1.3,
+          "entryPrice": 589000,
+          "stopLoss": 511000,
+          "firstTargetPrice": 745000,
+          "riskReward": 2.37,
+          "day3ReturnPct": 11.21,
+          "day5ReturnPct": 15.62,
+          "day10ReturnPct": 18.85,
+          "firstEvent": "TARGET_HIT",
+          "firstEventDate": "2026-06-01",
+          "rMultiple": 2.0,
+          "company": "현대차",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "현대차",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "000270",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "기아",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "012330",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "현대모비스",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "009150",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 1,
+      "targetHitCount": 1,
+      "stopHitCount": 0,
+      "targetHitRate": 100.0,
+      "averageR": 2.0,
+      "signals": [
+        {
+          "signalDate": "2026-03-04",
+          "ticker": "009150",
+          "currentPrice": 362500,
+          "technicalScore": 70,
+          "strategy": "PULLBACK",
+          "ma20": 353000,
+          "rsi14": 62.48,
+          "volumeRatio20": 1.41,
+          "entryPrice": 353000,
+          "stopLoss": 308000,
+          "firstTargetPrice": 443000,
+          "riskReward": 2.69,
+          "day3ReturnPct": 8.22,
+          "day5ReturnPct": 15.01,
+          "day10ReturnPct": 31.44,
+          "firstEvent": "TARGET_HIT",
+          "firstEventDate": "2026-03-17",
+          "rMultiple": 2.0,
+          "company": "삼성전기",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "삼성전기",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "006400",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "삼성SDI",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "028260",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 1,
+      "targetHitCount": 0,
+      "stopHitCount": 1,
+      "targetHitRate": 0.0,
+      "averageR": -1.0,
+      "signals": [
+        {
+          "signalDate": "2025-02-26",
+          "ticker": "028260",
+          "currentPrice": 125000,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 124000,
+          "rsi14": 59.59,
+          "volumeRatio20": 1.3,
+          "entryPrice": 124000,
+          "stopLoss": 118500,
+          "firstTargetPrice": 136000,
+          "riskReward": 2.22,
+          "day3ReturnPct": -1.45,
+          "day5ReturnPct": -1.37,
+          "day10ReturnPct": -4.11,
+          "firstEvent": "STOP_HIT",
+          "firstEventDate": "2025-03-11",
+          "rMultiple": -1.0,
+          "company": "삼성물산",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "삼성물산",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "018260",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "삼성에스디에스",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "051910",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "LG화학",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "066570",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "LG전자",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "003550",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "LG",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "003670",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 3,
+      "targetHitCount": 0,
+      "stopHitCount": 1,
+      "targetHitRate": 0.0,
+      "averageR": -0.8,
+      "signals": [
+        {
+          "signalDate": "2023-04-26",
+          "ticker": "003670",
+          "currentPrice": 332500,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 328000,
+          "rsi14": 59.01,
+          "volumeRatio20": 1.69,
+          "entryPrice": 328000,
+          "stopLoss": 288000,
+          "firstTargetPrice": 408000,
+          "riskReward": 2.36,
+          "day3ReturnPct": 7.47,
+          "day5ReturnPct": 3.2,
+          "day10ReturnPct": -8.38,
+          "firstEvent": "TIME_EXIT",
+          "firstEventDate": "2023-05-12",
+          "rMultiple": -0.69,
+          "company": "POSCO홀딩스",
+          "ruleVersion": "v1.0"
+        },
+        {
+          "signalDate": "2023-04-27",
+          "ticker": "003670",
+          "currentPrice": 340000,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 332000,
+          "rsi14": 59.73,
+          "volumeRatio20": 1.24,
+          "entryPrice": 332000,
+          "stopLoss": 291000,
+          "firstTargetPrice": 414000,
+          "riskReward": 2.21,
+          "day3ReturnPct": 3.92,
+          "day5ReturnPct": -3.16,
+          "day10ReturnPct": -8.58,
+          "firstEvent": "TIME_EXIT",
+          "firstEventDate": "2023-05-15",
+          "rMultiple": -0.7,
+          "company": "POSCO홀딩스",
+          "ruleVersion": "v1.0"
+        },
+        {
+          "signalDate": "2023-08-29",
+          "ticker": "003670",
+          "currentPrice": 455000,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 451500,
+          "rsi14": 52.08,
+          "volumeRatio20": 1.34,
+          "entryPrice": 451000,
+          "stopLoss": 416000,
+          "firstTargetPrice": 522000,
+          "riskReward": 2.55,
+          "day3ReturnPct": -4.43,
+          "day5ReturnPct": 0.22,
+          "day10ReturnPct": -11.97,
+          "firstEvent": "STOP_HIT",
+          "firstEventDate": "2023-09-07",
+          "rMultiple": -1.0,
+          "company": "POSCO홀딩스",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "POSCO홀딩스",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "010130",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 1,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": 0.46,
+      "signals": [
+        {
+          "signalDate": "2023-07-27",
+          "ticker": "010130",
+          "currentPrice": 491000,
+          "technicalScore": 70,
+          "strategy": "PULLBACK",
+          "ma20": 472000,
+          "rsi14": 63.72,
+          "volumeRatio20": 1.28,
+          "entryPrice": 486000,
+          "stopLoss": 455500,
+          "firstTargetPrice": 548000,
+          "riskReward": 2.24,
+          "day3ReturnPct": 2.16,
+          "day5ReturnPct": 3.09,
+          "day10ReturnPct": 2.88,
+          "firstEvent": "TIME_EXIT",
+          "firstEventDate": "2023-08-10",
+          "rMultiple": 0.46,
+          "company": "고려아연",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "고려아연",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "035420",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "NAVER",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "035720",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 1,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": 1.55,
+      "signals": [
+        {
+          "signalDate": "2025-02-13",
+          "ticker": "035720",
+          "currentPrice": 40200,
+          "technicalScore": 70,
+          "strategy": "PULLBACK",
+          "ma20": 39300,
+          "rsi14": 60.5,
+          "volumeRatio20": 1.88,
+          "entryPrice": 39400,
+          "stopLoss": 36150,
+          "firstTargetPrice": 46000,
+          "riskReward": 2.01,
+          "day3ReturnPct": -1.14,
+          "day5ReturnPct": 0.89,
+          "day10ReturnPct": 12.82,
+          "firstEvent": "TIME_EXIT",
+          "firstEventDate": "2025-02-27",
+          "rMultiple": 1.55,
+          "company": "카카오",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "카카오",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "034730",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "SK",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "105560",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "KB금융",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "055550",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "신한지주",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "086790",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 3,
+      "targetHitCount": 0,
+      "stopHitCount": 2,
+      "targetHitRate": 0.0,
+      "averageR": -0.71,
+      "signals": [
+        {
+          "signalDate": "2024-07-11",
+          "ticker": "086790",
+          "currentPrice": 62000,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 61300,
+          "rsi14": 58.54,
+          "volumeRatio20": 1.25,
+          "entryPrice": 61300,
+          "stopLoss": 58300,
+          "firstTargetPrice": 67300,
+          "riskReward": 2.17,
+          "day3ReturnPct": 1.31,
+          "day5ReturnPct": 0.82,
+          "day10ReturnPct": -0.65,
+          "firstEvent": "TIME_EXIT",
+          "firstEventDate": "2024-07-25",
+          "rMultiple": -0.13,
+          "company": "하나금융지주",
+          "ruleVersion": "v1.0"
+        },
+        {
+          "signalDate": "2024-08-28",
+          "ticker": "086790",
+          "currentPrice": 63300,
+          "technicalScore": 70,
+          "strategy": "PULLBACK",
+          "ma20": 62650,
+          "rsi14": 62.75,
+          "volumeRatio20": 1.49,
+          "entryPrice": 62700,
+          "stopLoss": 59550,
+          "firstTargetPrice": 68900,
+          "riskReward": 2.12,
+          "day3ReturnPct": 1.12,
+          "day5ReturnPct": 0.0,
+          "day10ReturnPct": -8.29,
+          "firstEvent": "STOP_HIT",
+          "firstEventDate": "2024-09-11",
+          "rMultiple": -1.0,
+          "company": "하나금융지주",
+          "ruleVersion": "v1.0"
+        },
+        {
+          "signalDate": "2024-08-29",
+          "ticker": "086790",
+          "currentPrice": 63000,
+          "technicalScore": 70,
+          "strategy": "PULLBACK",
+          "ma20": 62600,
+          "rsi14": 61.04,
+          "volumeRatio20": 1.45,
+          "entryPrice": 62600,
+          "stopLoss": 59400,
+          "firstTargetPrice": 69000,
+          "riskReward": 2.09,
+          "day3ReturnPct": 2.08,
+          "day5ReturnPct": 0.48,
+          "day10ReturnPct": -6.87,
+          "firstEvent": "STOP_HIT",
+          "firstEventDate": "2024-09-11",
+          "rMultiple": -1.0,
+          "company": "하나금융지주",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "하나금융지주",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "316140",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 2,
+      "targetHitCount": 0,
+      "stopHitCount": 2,
+      "targetHitRate": 0.0,
+      "averageR": -1.0,
+      "signals": [
+        {
+          "signalDate": "2024-08-02",
+          "ticker": "316140",
+          "currentPrice": 15150,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 15100,
+          "rsi14": 54.82,
+          "volumeRatio20": 1.36,
+          "entryPrice": 15100,
+          "stopLoss": 14350,
+          "firstTargetPrice": 16500,
+          "riskReward": 2.59,
+          "day3ReturnPct": -3.77,
+          "day5ReturnPct": -2.85,
+          "day10ReturnPct": 6.23,
+          "firstEvent": "STOP_HIT",
+          "firstEventDate": "2024-08-05",
+          "rMultiple": -1.0,
+          "company": "우리금융지주",
+          "ruleVersion": "v1.0"
+        },
+        {
+          "signalDate": "2026-02-27",
+          "ticker": "316140",
+          "currentPrice": 36000,
+          "technicalScore": 70,
+          "strategy": "PULLBACK",
+          "ma20": 35350,
+          "rsi14": 63.86,
+          "volumeRatio20": 2.79,
+          "entryPrice": 35350,
+          "stopLoss": 32600,
+          "firstTargetPrice": 40850,
+          "riskReward": 2.24,
+          "day3ReturnPct": -4.53,
+          "day5ReturnPct": -10.75,
+          "day10ReturnPct": -9.76,
+          "firstEvent": "STOP_HIT",
+          "firstEventDate": "2026-03-04",
+          "rMultiple": -1.0,
+          "company": "우리금융지주",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "우리금융지주",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "032830",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 2,
+      "targetHitCount": 2,
+      "stopHitCount": 0,
+      "targetHitRate": 100.0,
+      "averageR": 2.0,
+      "signals": [
+        {
+          "signalDate": "2026-06-10",
+          "ticker": "032830",
+          "currentPrice": 368000,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 361500,
+          "rsi14": 58.05,
+          "volumeRatio20": 1.22,
+          "entryPrice": 361500,
+          "stopLoss": 303500,
+          "firstTargetPrice": 477500,
+          "riskReward": 2.13,
+          "day3ReturnPct": 17.01,
+          "day5ReturnPct": 23.65,
+          "day10ReturnPct": 19.78,
+          "firstEvent": "TARGET_HIT",
+          "firstEventDate": "2026-06-19",
+          "rMultiple": 2.0,
+          "company": "삼성생명",
+          "ruleVersion": "v1.0"
+        },
+        {
+          "signalDate": "2026-06-11",
+          "ticker": "032830",
+          "currentPrice": 365000,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 364500,
+          "rsi14": 57.55,
+          "volumeRatio20": 1.35,
+          "entryPrice": 364500,
+          "stopLoss": 307000,
+          "firstTargetPrice": 479500,
+          "riskReward": 2.1,
+          "day3ReturnPct": 18.24,
+          "day5ReturnPct": 28.67,
+          "day10ReturnPct": 22.63,
+          "firstEvent": "TARGET_HIT",
+          "firstEventDate": "2026-06-19",
+          "rMultiple": 2.0,
+          "company": "삼성생명",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "삼성생명",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "329180",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "HD현대중공업",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "009540",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "HD한국조선해양",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "047810",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "한국항공우주",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "259960",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 0,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": null,
+      "signals": [],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "크래프톤",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "068270",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 1,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": 0.53,
+      "signals": [
+        {
+          "signalDate": "2025-11-24",
+          "ticker": "068270",
+          "currentPrice": 182000,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 181000,
+          "rsi14": 55.87,
+          "volumeRatio20": 1.97,
+          "entryPrice": 181000,
+          "stopLoss": 169500,
+          "firstTargetPrice": 203000,
+          "riskReward": 2.02,
+          "day3ReturnPct": 2.32,
+          "day5ReturnPct": 2.65,
+          "day10ReturnPct": 3.37,
+          "firstEvent": "TIME_EXIT",
+          "firstEventDate": "2025-12-08",
+          "rMultiple": 0.53,
+          "company": "셀트리온",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "셀트리온",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    },
+    {
+      "success": true,
+      "ticker": "096770",
+      "ruleVersion": "v1.0",
+      "horizonTradingDays": 10,
+      "evaluatedDays": 831,
+      "signalCount": 1,
+      "targetHitCount": 0,
+      "stopHitCount": 0,
+      "targetHitRate": null,
+      "averageR": 1.56,
+      "signals": [
+        {
+          "signalDate": "2026-04-02",
+          "ticker": "096770",
+          "currentPrice": 115500,
+          "technicalScore": 90,
+          "strategy": "PULLBACK",
+          "ma20": 114000,
+          "rsi14": 52.95,
+          "volumeRatio20": 1.34,
+          "entryPrice": 114000,
+          "stopLoss": 106000,
+          "firstTargetPrice": 130000,
+          "riskReward": 2.19,
+          "day3ReturnPct": 6.84,
+          "day5ReturnPct": 8.77,
+          "day10ReturnPct": 10.96,
+          "firstEvent": "TIME_EXIT",
+          "firstEventDate": "2026-04-16",
+          "rMultiple": 1.56,
+          "company": "SK이노베이션",
+          "ruleVersion": "v1.0"
+        }
+      ],
+      "source": "Naver mobile daily OHLCV",
+      "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+      "company": "SK이노베이션",
+      "barRange": {
+        "from": "2023-01-12",
+        "to": "2026-09-21",
+        "count": 900
+      }
+    }
+  ]
+}
