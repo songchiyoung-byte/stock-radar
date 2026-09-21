@@ -13,6 +13,7 @@ PRICE_HISTORY_URL = (
 TICKER_PATTERN = re.compile(r"^[0-9]{6}$")
 MIN_BARS = 60
 HISTORY_BARS = 140
+MAX_HISTORY_BARS = 850
 MAX_PAGE_SIZE = 60
 
 COMMON_HEADERS = {
@@ -113,13 +114,14 @@ def normalize_history(payload):
     return bars
 
 
-def fetch_history(ticker):
+def fetch_history(ticker, history_bars=HISTORY_BARS):
     headers = {
         **COMMON_HEADERS,
         "Referer": f"https://m.stock.naver.com/domestic/stock/{ticker}/total",
     }
     bars_by_date = {}
-    remaining = HISTORY_BARS
+    history_bars = max(MIN_BARS, min(int(history_bars), MAX_HISTORY_BARS))
+    remaining = history_bars
     page = 1
 
     while remaining > 0:
@@ -151,7 +153,7 @@ def fetch_history(ticker):
 
     bars = list(bars_by_date.values())
     bars.sort(key=lambda item: str(item.get("date") or ""))
-    return bars[-HISTORY_BARS:]
+    return bars[-history_bars:]
 
 
 def analyze_bars(ticker, bars):
@@ -312,6 +314,98 @@ def analyze_bars(ticker, bars):
     }
 
 
+def backtest_v1(ticker, bars, horizon=10):
+    """Evaluate the current swing rule without using future prices in a signal."""
+    horizon = max(3, min(int(horizon), 20))
+    signals = []
+    evaluated_days = 0
+
+    for index in range(MIN_BARS - 1, len(bars) - horizon):
+        history = bars[:index + 1]
+        analysis = analyze_bars(ticker, history)
+        if not analysis.get("success"):
+            continue
+        evaluated_days += 1
+
+        indicators = analysis["indicators"]
+        scanner_passed = (
+            analysis.get("qualified") and
+            analysis.get("inBuyZone") and
+            history[-1]["close"] >= indicators["ma20"] and
+            (indicators.get("volumeRatio20") or 0) >= 1.2 and
+            45 <= indicators["rsi14"] <= 65
+        )
+        if not scanner_passed:
+            continue
+
+        entry = analysis["entryPrice"]
+        stop = analysis["stopLoss"]
+        target = analysis["firstTargetPrice"]
+        future = bars[index + 1:index + 1 + horizon]
+        event = "TIME_EXIT"
+        event_date = future[-1]["date"]
+
+        for bar in future:
+            # Daily OHLC cannot order a same-day target and stop touch.
+            # Count that ambiguity as stop-first for conservative validation.
+            if bar["low"] <= stop:
+                event = "STOP_HIT"
+                event_date = bar["date"]
+                break
+            if bar["high"] >= target:
+                event = "TARGET_HIT"
+                event_date = bar["date"]
+                break
+
+        closes = [bar["close"] for bar in future]
+        day_return = lambda days: (
+            round((closes[days - 1] / entry - 1) * 100, 2)
+            if len(closes) >= days else None
+        )
+        first_price = target if event == "TARGET_HIT" else stop if event == "STOP_HIT" else closes[-1]
+        r_multiple = round((first_price - entry) / (entry - stop), 2)
+
+        signals.append({
+            "signalDate": history[-1]["date"],
+            "ticker": ticker,
+            "currentPrice": analysis["currentPrice"],
+            "technicalScore": analysis["technicalScore"],
+            "strategy": analysis["strategy"],
+            "ma20": indicators["ma20"],
+            "rsi14": indicators["rsi14"],
+            "volumeRatio20": indicators.get("volumeRatio20"),
+            "entryPrice": entry,
+            "stopLoss": stop,
+            "firstTargetPrice": target,
+            "riskReward": analysis["riskReward"],
+            "day3ReturnPct": day_return(3),
+            "day5ReturnPct": day_return(5),
+            "day10ReturnPct": day_return(10),
+            "firstEvent": event,
+            "firstEventDate": event_date,
+            "rMultiple": r_multiple,
+        })
+
+    target_hits = sum(item["firstEvent"] == "TARGET_HIT" for item in signals)
+    stop_hits = sum(item["firstEvent"] == "STOP_HIT" for item in signals)
+    resolved = target_hits + stop_hits
+    return {
+        "success": True,
+        "ticker": ticker,
+        "ruleVersion": "v1.0",
+        "horizonTradingDays": horizon,
+        "evaluatedDays": evaluated_days,
+        "signalCount": len(signals),
+        "targetHitCount": target_hits,
+        "stopHitCount": stop_hits,
+        "targetHitRate": round(target_hits / resolved * 100, 2) if resolved else None,
+        "averageR": round(sum(item["rMultiple"] for item in signals) / len(signals), 2) if signals else None,
+        "signals": signals,
+        "source": "Naver mobile daily OHLCV",
+        "limitation": "일봉 OHLC만 사용하므로 같은 날 목표·손절 동시 터치는 보수적으로 손절 처리합니다.",
+    }
+
+
 class handler(BaseHTTPRequestHandler):
     def send_json(self, status, payload):
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -340,8 +434,14 @@ class handler(BaseHTTPRequestHandler):
                     "error": "Valid 6-digit ticker is required",
                 })
                 return
-            bars = fetch_history(ticker)
-            result = analyze_bars(ticker, bars)
+            mode = query.get("mode", ["analysis"])[0].strip().lower()
+            history_bars = query.get("historyBars", [HISTORY_BARS])[0]
+            bars = fetch_history(ticker, history_bars)
+            result = (
+                backtest_v1(ticker, bars, query.get("horizon", [10])[0])
+                if mode == "backtest" else
+                analyze_bars(ticker, bars)
+            )
             self.send_json(200 if result.get("success") else 422, result)
         except urllib.error.HTTPError as error:
             self.send_json(502, {
